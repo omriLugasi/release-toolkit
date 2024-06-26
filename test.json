@@ -1,23 +1,23 @@
 {
-    "sha": "7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-    "node_id": "C_kwDOMOk0ZtoAKDdkMjlkNjg3YzRkMmRjMjFmMWUwNjE5YmMzN2E0Mjc5ZjJhOTQ0OTU",
+    "sha": "f865e79a563a04d5a54891755d3628f73c87ca39",
+    "node_id": "C_kwDOMOk0ZtoAKGY4NjVlNzlhNTYzYTA0ZDVhNTQ4OTE3NTVkMzYyOGY3M2M4N2NhMzk",
     "commit": {
         "author": {
             "name": "omri",
             "email": "omlrc1991@gmail.com",
-            "date": "2024-06-26T19:51:46Z"
+            "date": "2024-06-26T20:29:39Z"
         },
         "committer": {
             "name": "omri",
             "email": "omlrc1991@gmail.com",
-            "date": "2024-06-26T19:51:46Z"
+            "date": "2024-06-26T20:29:39Z"
         },
-        "message": "feat(): infrasturcture commit",
+        "message": "chore(): another test to understand the commit response",
         "tree": {
-            "sha": "dca78e1d29876c9f71effecd43ff8bbb4520f465",
-            "url": "https://api.github.com/repos/omriLugasi/release-sparks/git/trees/dca78e1d29876c9f71effecd43ff8bbb4520f465"
+            "sha": "2a009af3e5c15bf5b10272d17e6a4d44501cacbe",
+            "url": "https://api.github.com/repos/omriLugasi/release-sparks/git/trees/2a009af3e5c15bf5b10272d17e6a4d44501cacbe"
         },
-        "url": "https://api.github.com/repos/omriLugasi/release-sparks/git/commits/7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
+        "url": "https://api.github.com/repos/omriLugasi/release-sparks/git/commits/f865e79a563a04d5a54891755d3628f73c87ca39",
         "comment_count": 0,
         "verification": {
             "verified": false,
@@ -26,129 +26,22 @@
             "payload": null
         }
     },
-    "url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-    "html_url": "https://github.com/omriLugasi/release-sparks/commit/7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-    "comments_url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/comments",
+    "url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/f865e79a563a04d5a54891755d3628f73c87ca39",
+    "html_url": "https://github.com/omriLugasi/release-sparks/commit/f865e79a563a04d5a54891755d3628f73c87ca39",
+    "comments_url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/f865e79a563a04d5a54891755d3628f73c87ca39/comments",
     "author": null,
     "committer": null,
     "parents": [
         {
-            "sha": "7d9a841b54cdb0f4f91b939ac2881ab0ecfb6286",
-            "url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/7d9a841b54cdb0f4f91b939ac2881ab0ecfb6286",
-            "html_url": "https://github.com/omriLugasi/release-sparks/commit/7d9a841b54cdb0f4f91b939ac2881ab0ecfb6286"
+            "sha": "7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
+            "url": "https://api.github.com/repos/omriLugasi/release-sparks/commits/7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
+            "html_url": "https://github.com/omriLugasi/release-sparks/commit/7d29d687c4d2dc21f1e0619bc37a4279f2a94495"
         }
     ],
     "stats": {
-        "total": 165,
-        "additions": 165,
-        "deletions": 0
+        "total": 356,
+        "additions": 250,
+        "deletions": 106
     },
-    "files": [
-        {
-            "sha": "1fe1b00e4f1796bb694dfeeeca0d7a73605261c2",
-            "filename": ".gitignore",
-            "status": "added",
-            "additions": 2,
-            "deletions": 0,
-            "changes": 2,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/.gitignore",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/.gitignore",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/.gitignore?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,2 @@\n+.idea/\n+node_modules/"
-        },
-        {
-            "sha": "0066f8d093ce97a58cc130077c8b823cb7b23c54",
-            "filename": "package.json",
-            "status": "added",
-            "additions": 11,
-            "deletions": 0,
-            "changes": 11,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/package.json",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/package.json",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/package.json?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,11 @@\n+{\n+  \"name\": \"release-sparks\",\n+  \"version\": \"1.0.0\",\n+  \"main\": \"index.js\",\n+  \"repository\": \"git@github.com:omriLugasi/release-sparks.git\",\n+  \"author\": \"omri <omlrc1991@gmail.com>\",\n+  \"license\": \"MIT\",\n+  \"dependencies\": {\n+    \"@octokit/rest\": \"^21.0.0\"\n+  }\n+}"
-        },
-        {
-            "sha": "fcc2c7ed792fbbdda71374c725ed679944a9ce5a",
-            "filename": "src/commit-resolver/index.js",
-            "status": "added",
-            "additions": 7,
-            "deletions": 0,
-            "changes": 7,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fcommit-resolver%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fcommit-resolver%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Fcommit-resolver%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,7 @@\n+/**\n+ * @description\n+ * Responsible on the commit analysis\n+ */\n+module.exports = () => {\n+\n+}"
-        },
-        {
-            "sha": "7cb37a56f7c9e85f9714c7cc8dcb3a1676bef71e",
-            "filename": "src/config/index.js",
-            "status": "added",
-            "additions": 17,
-            "deletions": 0,
-            "changes": 17,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fconfig%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fconfig%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Fconfig%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,17 @@\n+\n+let properties = {}\n+\n+process.argv.forEach(function (val, index, array) {\n+  console.log(index + ': ' + val);\n+  if (index > 1) {\n+    const [key, value] = val.split('=')\n+    properties[key.replace('--', '')] = value\n+  }\n+});\n+\n+if (!properties.config) {\n+  const { release_sparks } = require(process.cwd() + '/package.json')\n+  properties = release_sparks\n+}\n+\n+module.exports = properties"
-        },
-        {
-            "sha": "92869326f5be38cef879d7f346690534507769b6",
-            "filename": "src/index.js",
-            "status": "added",
-            "additions": 10,
-            "deletions": 0,
-            "changes": 10,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,10 @@\n+\n+// this file will be the entry point of the package.\n+\n+const config = require('./config')\n+\n+\n+console.log(config)\n+\n+// understand commits\n+// get the last release"
-        },
-        {
-            "sha": "3bc362cf4cec52342caff6cec0f90c58aa123145",
-            "filename": "src/plugins/github/index.js",
-            "status": "added",
-            "additions": 12,
-            "deletions": 0,
-            "changes": 12,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fgithub%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fgithub%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Fplugins%2Fgithub%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,12 @@\n+\n+// github module responsible on the github release, github tag, github release\n+/**\n+ * @description\n+ * github module responsible on the github release\n+ * 1. github release\n+ * 2. github tag\n+ * 3. github change log\n+ */\n+module.exports = () => {\n+\n+}"
-        },
-        {
-            "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-            "filename": "src/plugins/npm/index.js",
-            "status": "added",
-            "additions": 0,
-            "deletions": 0,
-            "changes": 0,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fnpm%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fnpm%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Fplugins%2Fnpm%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495"
-        },
-        {
-            "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-            "filename": "src/plugins/slack/index.js",
-            "status": "added",
-            "additions": 0,
-            "deletions": 0,
-            "changes": 0,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fslack%2Findex.js",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/src%2Fplugins%2Fslack%2Findex.js",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/src%2Fplugins%2Fslack%2Findex.js?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495"
-        },
-        {
-            "sha": "96fc34db846dc94443e4b2b73e0cb9b9aa138c62",
-            "filename": "yarn.lock",
-            "status": "added",
-            "additions": 106,
-            "deletions": 0,
-            "changes": 106,
-            "blob_url": "https://github.com/omriLugasi/release-sparks/blob/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/yarn.lock",
-            "raw_url": "https://github.com/omriLugasi/release-sparks/raw/7d29d687c4d2dc21f1e0619bc37a4279f2a94495/yarn.lock",
-            "contents_url": "https://api.github.com/repos/omriLugasi/release-sparks/contents/yarn.lock?ref=7d29d687c4d2dc21f1e0619bc37a4279f2a94495",
-            "patch": "@@ -0,0 +1,106 @@\n+# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.\n+# yarn lockfile v1\n+\n+\n+\"@octokit/auth-token@^5.0.0\":\n+  version \"5.1.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/auth-token/-/auth-token-5.1.1.tgz#3bbfe905111332a17f72d80bd0b51a3e2fa2cf07\"\n+  integrity sha512-rh3G3wDO8J9wSjfI436JUKzHIxq8NaiL0tVeB2aXmG6p/9859aUOAjA9pmSPNGGZxfwmaJ9ozOJImuNVJdpvbA==\n+\n+\"@octokit/core@^6.1.2\":\n+  version \"6.1.2\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/core/-/core-6.1.2.tgz#20442d0a97c411612da206411e356014d1d1bd17\"\n+  integrity sha512-hEb7Ma4cGJGEUNOAVmyfdB/3WirWMg5hDuNFVejGEDFqupeOysLc2sG6HJxY2etBp5YQu5Wtxwi020jS9xlUwg==\n+  dependencies:\n+    \"@octokit/auth-token\" \"^5.0.0\"\n+    \"@octokit/graphql\" \"^8.0.0\"\n+    \"@octokit/request\" \"^9.0.0\"\n+    \"@octokit/request-error\" \"^6.0.1\"\n+    \"@octokit/types\" \"^13.0.0\"\n+    before-after-hook \"^3.0.2\"\n+    universal-user-agent \"^7.0.0\"\n+\n+\"@octokit/endpoint@^10.0.0\":\n+  version \"10.1.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/endpoint/-/endpoint-10.1.1.tgz#1a9694e7aef6aa9d854dc78dd062945945869bcc\"\n+  integrity sha512-JYjh5rMOwXMJyUpj028cu0Gbp7qe/ihxfJMLc8VZBMMqSwLgOxDI1911gV4Enl1QSavAQNJcwmwBF9M0VvLh6Q==\n+  dependencies:\n+    \"@octokit/types\" \"^13.0.0\"\n+    universal-user-agent \"^7.0.2\"\n+\n+\"@octokit/graphql@^8.0.0\":\n+  version \"8.1.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/graphql/-/graphql-8.1.1.tgz#3cacab5f2e55d91c733e3bf481d3a3f8a5f639c4\"\n+  integrity sha512-ukiRmuHTi6ebQx/HFRCXKbDlOh/7xEV6QUXaE7MJEKGNAncGI/STSbOkl12qVXZrfZdpXctx5O9X1AIaebiDBg==\n+  dependencies:\n+    \"@octokit/request\" \"^9.0.0\"\n+    \"@octokit/types\" \"^13.0.0\"\n+    universal-user-agent \"^7.0.0\"\n+\n+\"@octokit/openapi-types@^22.2.0\":\n+  version \"22.2.0\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/openapi-types/-/openapi-types-22.2.0.tgz#75aa7dcd440821d99def6a60b5f014207ae4968e\"\n+  integrity sha512-QBhVjcUa9W7Wwhm6DBFu6ZZ+1/t/oYxqc2tp81Pi41YNuJinbFRx8B133qVOrAaBbF7D/m0Et6f9/pZt9Rc+tg==\n+\n+\"@octokit/plugin-paginate-rest@^11.0.0\":\n+  version \"11.3.0\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-11.3.0.tgz#f8511b5df06b83e662c54f249a11a0da2213c6c3\"\n+  integrity sha512-n4znWfRinnUQF6TPyxs7EctSAA3yVSP4qlJP2YgI3g9d4Ae2n5F3XDOjbUluKRxPU3rfsgpOboI4O4VtPc6Ilg==\n+  dependencies:\n+    \"@octokit/types\" \"^13.5.0\"\n+\n+\"@octokit/plugin-request-log@^5.1.0\":\n+  version \"5.3.0\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/plugin-request-log/-/plugin-request-log-5.3.0.tgz#4dea4f34316b7075d02796edcb73103266119e61\"\n+  integrity sha512-FiGcyjdtYPlr03ExBk/0ysIlEFIFGJQAVoPPMxL19B24bVSEiZQnVGBunNtaAF1YnvE/EFoDpXmITtRnyCiypQ==\n+\n+\"@octokit/plugin-rest-endpoint-methods@^13.0.0\":\n+  version \"13.2.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-13.2.1.tgz#b5e9118b4e76180cee65e03b71bcfcf632ae12d9\"\n+  integrity sha512-YMWBw6Exh1ZBs5cCE0AnzYxSQDIJS00VlBqISTgNYmu5MBdeM07K/MAJjy/VkNaH5jpJmD/5HFUvIZ+LDB5jSQ==\n+  dependencies:\n+    \"@octokit/types\" \"^13.5.0\"\n+\n+\"@octokit/request-error@^6.0.1\":\n+  version \"6.1.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/request-error/-/request-error-6.1.1.tgz#bed1b5f52ce7fefb1077a92bf42124ff36f73f2c\"\n+  integrity sha512-1mw1gqT3fR/WFvnoVpY/zUM2o/XkMs/2AszUUG9I69xn0JFLv6PGkPhNk5lbfvROs79wiS0bqiJNxfCZcRJJdg==\n+  dependencies:\n+    \"@octokit/types\" \"^13.0.0\"\n+\n+\"@octokit/request@^9.0.0\":\n+  version \"9.1.1\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/request/-/request-9.1.1.tgz#e836eb69c0fb4b59b6437af7716ca348a1232a52\"\n+  integrity sha512-pyAguc0p+f+GbQho0uNetNQMmLG1e80WjkIaqqgUkihqUp0boRU6nKItXO4VWnr+nbZiLGEyy4TeKRwqaLvYgw==\n+  dependencies:\n+    \"@octokit/endpoint\" \"^10.0.0\"\n+    \"@octokit/request-error\" \"^6.0.1\"\n+    \"@octokit/types\" \"^13.1.0\"\n+    universal-user-agent \"^7.0.2\"\n+\n+\"@octokit/rest@^21.0.0\":\n+  version \"21.0.0\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/rest/-/rest-21.0.0.tgz#bde4b657193643b6b691810fe890755a3c67dd9f\"\n+  integrity sha512-XudXXOmiIjivdjNZ+fN71NLrnDM00sxSZlhqmPR3v0dVoJwyP628tSlc12xqn8nX3N0965583RBw5GPo6r8u4Q==\n+  dependencies:\n+    \"@octokit/core\" \"^6.1.2\"\n+    \"@octokit/plugin-paginate-rest\" \"^11.0.0\"\n+    \"@octokit/plugin-request-log\" \"^5.1.0\"\n+    \"@octokit/plugin-rest-endpoint-methods\" \"^13.0.0\"\n+\n+\"@octokit/types@^13.0.0\", \"@octokit/types@^13.1.0\", \"@octokit/types@^13.5.0\":\n+  version \"13.5.0\"\n+  resolved \"https://registry.yarnpkg.com/@octokit/types/-/types-13.5.0.tgz#4796e56b7b267ebc7c921dcec262b3d5bfb18883\"\n+  integrity sha512-HdqWTf5Z3qwDVlzCrP8UJquMwunpDiMPt5er+QjGzL4hqr/vBVY/MauQgS1xWxCDT1oMx1EULyqxncdCY/NVSQ==\n+  dependencies:\n+    \"@octokit/openapi-types\" \"^22.2.0\"\n+\n+before-after-hook@^3.0.2:\n+  version \"3.0.2\"\n+  resolved \"https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-3.0.2.tgz#d5665a5fa8b62294a5aa0a499f933f4a1016195d\"\n+  integrity sha512-Nik3Sc0ncrMK4UUdXQmAnRtzmNQTAAXmXIopizwZ1W1t8QmfJj+zL4OA2I7XPTPW5z5TDqv4hRo/JzouDJnX3A==\n+\n+universal-user-agent@^7.0.0, universal-user-agent@^7.0.2:\n+  version \"7.0.2\"\n+  resolved \"https://registry.yarnpkg.com/universal-user-agent/-/universal-user-agent-7.0.2.tgz#52e7d0e9b3dc4df06cc33cb2b9fd79041a54827e\"\n+  integrity sha512-0JCqzSKnStlRRQfCdowvqy3cy0Dvtlb8xecj/H8JFZuCze4rwjPZQOgvFvn0Ws/usCHQFGpyr+pB9adaGwXn4Q=="
-        }
-    ]
+    "files": []
 }

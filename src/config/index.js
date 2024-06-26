@@ -12,15 +12,8 @@ process.argv.forEach(function (val, index, array) {
 });
 
 if (!properties.config) {
-  properties = release_sparks
-}
-
-properties.repository = repository.startsWith('git@') ? {
-  owner: repository.split(':')[1].split('/')[0],
-  repo: repository.split(':')[1].split('/')[1].replace('.git', '')
-} : {
-  owner: repository.replace('https://github.com/', '').split('/')[0],
-  repo: repository.replace('https://github.com/', '').split('/')[1].replace('.git', '')
+  properties = release_spark
+  properties.repository = repository
 }
 
 module.exports = properties
