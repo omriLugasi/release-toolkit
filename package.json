@@ -1,0 +1,11 @@
+{
+  "name": "release-sparks",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:omriLugasi/release-sparks.git",
+  "author": "omri <omlrc1991@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^21.0.0"
+  }
+}
