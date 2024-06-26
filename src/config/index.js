@@ -12,7 +12,7 @@ process.argv.forEach(function (val, index, array) {
 });
 
 if (!properties.config) {
-  properties = release_spark
+  properties = release_sparks
   properties.repository = repository
 }
 

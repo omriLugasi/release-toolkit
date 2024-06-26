@@ -1,16 +1,17 @@
 // this file will be the entry point of the package.
 
 const config = require('./config')
-const commitResolver = require('./commit-resolver')
+const { Github } = require('./plugins/github')
+// const commitResolver = require('./commit-resolver')
 
 console.log(config)
 
-// understand commits
-// get the last release
 
 
 const init = async () => {
-  await commitResolver()
+  const github = new Github()
+  const response = await github.getComments()
+  console.log(response)
 }
 
 init()

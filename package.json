@@ -9,6 +9,10 @@
     "axios": "^1.7.2"
   },
   "release_sparks": {
-    "branch": "master"
+    "branch": "main"
+  },
+  "devDependencies": {
+    "chai": "^5.1.1",
+    "sinon": "^18.0.0"
   }
 }
