@@ -6,6 +6,9 @@
   "author": "omri <omlrc1991@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@octokit/rest": "^21.0.0"
+    "axios": "^1.7.2"
+  },
+  "release_sparks": {
+    "branch": "master"
   }
 }
