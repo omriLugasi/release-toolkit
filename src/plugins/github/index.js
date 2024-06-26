@@ -42,7 +42,6 @@ class Github {
 
   }
 
-
   save() {
     // axiosInstance.get(`/repos/${config.repository.owner}/${config.repository.repo}/commits/${config.branch}?page=1`, {
     //   headers: {
