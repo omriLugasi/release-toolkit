@@ -9,7 +9,21 @@
     "axios": "^1.7.2"
   },
   "release_sparks": {
-    "branch": "main"
+    "branch": "main",
+    "commitPatterns": [
+      {
+        "pattern": "^refactor\\(\\):",
+        "upgrade": "major"
+      },
+      {
+        "pattern": "^feat\\(\\):",
+        "upgrade": "minor"
+      },
+      {
+        "pattern": "^chore\\(\\):",
+        "upgrade": "build"
+      }
+    ]
   },
   "devDependencies": {
     "chai": "^5.1.1",

@@ -22,6 +22,7 @@ const axiosInstance = axios.create({
 class Github {
   #repo
   #owner
+  #branch
 
   constructor() {
     const { repo, owner } = config.repository.startsWith('git@') ? {
@@ -38,8 +39,13 @@ class Github {
 
     this.#repo = 'h1-a'
     this.#owner = 'omriLugasi'
+    this.#branch = config.branch
   }
 
+
+  #extractCommitDate(releaseBody) {
+    return releaseBody.split('<!--sparks metadata last commit date: ')[1].replace(' -->', '')
+  }
 
 
   async #getLastRelease() {
@@ -47,32 +53,74 @@ class Github {
     return response.data
   }
 
-  async #getCommitsBySha(sha /* string*/){
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits?sha=${config.branch}`)
-    return response.data
+  async #getCommitsByDate(since){
+    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#branch}?since=${since}&until=${new Date().toISOString()}`)
+    return Array.isArray(response.data) ? response.data : [response.data]
   }
 
-  async getComments() {
+  async #createTag(newTag, commitHash) {
+    const tag = `${newTag}-${new Date().getTime()}`
+    const createdTagResponse = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/tags`, {
+      tag,
+      message: `Create new tag ${newTag} by release sparks`,
+      tagger: {
+        name: 'release sparks',
+        email: 'release-sparks@gmail.com',
+        date: new Date().toISOString()
+      },
+      type: 'commit',
+      object: commitHash
+    })
+
+    await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/refs`, {
+      ref: `refs/tags/${tag}`,
+      sha: createdTagResponse.data.sha
+    })
+  }
+
+  async #createRelease(newTag, commits) {
+    console.log('create new release')
+  }
+
+  async release(newTag, commits) {
+    const lastCommit = commits.reduce((acc, current) => {
+      if (!acc) {
+        return current
+      }
+      return new Date(acc.metadata.date).getTime() > new Date(current.metadata.date) ? acc : current
+    }, null)
+    await this.#createTag(newTag, lastCommit.metadata.hash)
+
+    // TODO: need to implement creation of release
+    await this.#createRelease(newTag, commits, lastCommit)
+  }
+
+  /**
+   * @description
+   * This function should work with github api to extract the commit messages from the last release.
+   */
+  async getDetails() {
     const [release] = await this.#getLastRelease()
+
     if (!release) {
       // TODO: if there is no release in the repository
     }
-    const { body } = release
-    // TODO: need to extract the hash of the last commit from the body
-    const sha = '297f1bdbb16ec50e885e559c2ab06c9a7472a664'
-    const commits = await this.#getCommitsBySha(sha)
-
+    const since = this.#extractCommitDate(release.body)
+    const commits = await this.#getCommitsByDate(since)
     const results = commits.reduce((acc, { sha: currentSha, commit }) => {
-      if (currentSha !== sha) {
         acc.push({
           message: commit.message,
-          url: commit.url
+          url: commit.url,
+          name: commit.url.substring(commit.url.length -6 , commit.url.length),
+          metadata: {
+            hash: currentSha,
+            date: commit.author.date
+          }
         })
-      }
       return acc
     }, [])
 
-    return results
+    return { commits: results, tag: release.tag_name.split('-')[0] }
   }
 
 }

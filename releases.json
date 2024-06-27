@@ -1,10 +1,10 @@
 [
     {
-        "url": "https://api.github.com/repos/omriLugasi/h1-a/releases/162637953",
-        "assets_url": "https://api.github.com/repos/omriLugasi/h1-a/releases/162637953/assets",
-        "upload_url": "https://uploads.github.com/repos/omriLugasi/h1-a/releases/162637953/assets{?name,label}",
-        "html_url": "https://github.com/omriLugasi/h1-a/releases/tag/0.0.0",
-        "id": 162637953,
+        "url": "https://api.github.com/repos/omriLugasi/h1-a/releases/162853025",
+        "assets_url": "https://api.github.com/repos/omriLugasi/h1-a/releases/162853025/assets",
+        "upload_url": "https://uploads.github.com/repos/omriLugasi/h1-a/releases/162853025/assets{?name,label}",
+        "html_url": "https://github.com/omriLugasi/h1-a/releases/tag/0.0.0-test1",
+        "id": 162853025,
         "author": {
             "login": "omriLugasi",
             "id": 19176536,
@@ -25,17 +25,17 @@
             "type": "User",
             "site_admin": false
         },
-        "node_id": "RE_kwDOJaIlXM4JsaiB",
-        "tag_name": "0.0.0",
+        "node_id": "RE_kwDOJaIlXM4JtPCh",
+        "tag_name": "0.0.0-test1",
         "target_commitish": "main",
-        "name": "0.0.0 Project A Example 1",
+        "name": "Release for tag 0.0.0 test 1",
         "draft": false,
         "prerelease": false,
-        "created_at": "2024-06-26T20:59:44Z",
-        "published_at": "2024-06-26T21:03:08Z",
+        "created_at": "2024-06-27T19:26:07Z",
+        "published_at": "2024-06-27T19:27:43Z",
         "assets": [],
-        "tarball_url": "https://api.github.com/repos/omriLugasi/h1-a/tarball/0.0.0",
-        "zipball_url": "https://api.github.com/repos/omriLugasi/h1-a/zipball/0.0.0",
-        "body": "0.0.0 Project A Example 1\r\n\r\ncommits:  ([c87ca39](https://github.com/omriLugasi/release-sparks/commit/f865e79a563a04d5a54891755d3628f73c87ca39))"
+        "tarball_url": "https://api.github.com/repos/omriLugasi/h1-a/tarball/0.0.0-test1",
+        "zipball_url": "https://api.github.com/repos/omriLugasi/h1-a/zipball/0.0.0-test1",
+        "body": "\r\nthis is an example for body of release\r\n<!--sparks metadata last commit date: 2024-06-26T21:18:33Z -->"
     }
 ]
