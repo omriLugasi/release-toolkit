@@ -4,7 +4,6 @@ const { release_sparks, repository } = require(path.join(__dirname + '../../../p
 let properties = {}
 
 process.argv.forEach(function (val, index, array) {
-  console.log(index + ': ' + val);
   if (index > 1) {
     const [key, value] = val.split('=')
     properties[key.replace('--', '')] = value

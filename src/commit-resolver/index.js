@@ -38,16 +38,21 @@ module.exports = (tag, commits) => {
   const upgrades = []
   for (const commit of commits) {
     const { message } = commit
-    for (const { pattern, upgrade } of config.commitPatterns) {
+    let fitPatterns = false
+    for (const { pattern, upgrade, title } of config.commitPatterns) {
       const regex = new RegExp(pattern)
       if (regex.test(message)) {
-        affectedCommits.push(commit)
+        affectedCommits.push({ ...commit, metadata: { ...commit.metadata, title: title } })
         upgrades.push(versions[upgrade])
+        fitPatterns = true
       }
+    }
+    if (!fitPatterns) {
+      affectedCommits.push({ ...commit, metadata: { ...commit.metadata, title: 'Default' } })
     }
   }
 
-  if (!affectedCommits.length) {
+  if (!upgrades.length) {
     return {
       affectedCommits: []
     }
