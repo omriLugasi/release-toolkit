@@ -10,6 +10,32 @@
   },
   "release_sparks": {
     "branch": "main",
+    "workdirs": [
+      {
+        "folderPath": "src/a",
+        "id": "main",
+        "tagPattern": "{{tag}}-main",
+        "releasePattern": "Main - {{release}}"
+      },
+      {
+        "folderPath": "src/b",
+        "id": "package-b",
+        "tagPattern": "{{tag}}-b",
+        "releasePattern": "Secondary - {{release}}"
+      }
+    ],
+    "save": [
+      {
+        "folderPath": "common/sql-package",
+        "releaseName": "sql package",
+        "tagPattern": "sql-v{{tag}}"
+      },
+      {
+        "folderPath": "common/no-sql-package",
+        "releaseName": "No sql package",
+        "tagPattern": "no-sql-v{{tag}}"
+      }
+    ],
     "commitPatterns": [
       {
         "pattern": "^refactor\\(\\):",
