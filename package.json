@@ -24,18 +24,6 @@
         "releasePattern": "Secondary - {{release}}"
       }
     ],
-    "save": [
-      {
-        "folderPath": "common/sql-package",
-        "releaseName": "sql package",
-        "tagPattern": "sql-v{{tag}}"
-      },
-      {
-        "folderPath": "common/no-sql-package",
-        "releaseName": "No sql package",
-        "tagPattern": "no-sql-v{{tag}}"
-      }
-    ],
     "commitPatterns": [
       {
         "pattern": "^refactor\\(\\):",
@@ -51,6 +39,10 @@
         "pattern": "^chore\\(\\):",
         "upgrade": "build",
         "title": "Chores"
+      },
+      {
+        "pattern": "^ignore\\(\\):",
+        "upgrade": "ignore"
       }
     ]
   },
