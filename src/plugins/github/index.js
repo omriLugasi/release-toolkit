@@ -9,6 +9,7 @@
 const axios = require("axios");
 const config = require("../../config");
 const {modifyStringByDotNotation} = require("../../utils");
+const sinon = require("sinon");
 
 const axiosInstance = axios.create({
   baseURL: 'https://api.github.com',
@@ -80,6 +81,42 @@ class Github {
     }
 
     return this.#getLastRelease({ page: page + 1 })
+  }
+
+  async #findRelatedCommit() {
+    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#branch}`)
+
+    const isRelatedToWorkdir = commit => {
+      for (const file of commit.files) {
+        if (file.filename.startsWith(this.#workdir.folderPath)) {
+          return true
+        }
+      }
+      return false
+    }
+
+    if (isRelatedToWorkdir(response.data)) {
+      return response.data.commit.committer.date
+    }
+
+    const reviewNextCommit = async (url) => {
+      const { data: commit } = await axiosInstance.get(url)
+
+        if (isRelatedToWorkdir(commit)) {
+          return commit.commit.committer.date
+        }
+
+        if (Array.isArray(commit.parents) && commit.parents.length && commit.parents[0].url) {
+          return reviewNextCommit(commit.parents[0].url)
+        }
+      }
+
+    const commitParents = response.data.parents
+    if (Array.isArray(commitParents) && commitParents.length && commitParents[0].url) {
+      return reviewNextCommit(commitParents[0].url)
+    }
+
+    throw new Error(`Cannot find any commit that related to workdir=[${this.#workdir.folderPath}]`)
   }
 
   #isCommitDateValid(commit, since) {
@@ -188,19 +225,39 @@ class Github {
 
   /**
    * @description
+   * Provide the tag version and last commit date (-3 milliseconds) in the repository.
+   * The -3 will provide us the option to point on this commit as a commit that trigger the flow.
+   */
+  async #getDetailsFromLastCommit() {
+    const since = await this.#findRelatedCommit()
+    return {
+      since: new Date(new Date(since.trim()).getTime() - 3).toISOString(),
+      tagVersion: '0.0.0'
+    }
+  }
+
+  /**
+   * @description
    * This function should work with github api to extract the commit messages from the last release.
+   * if release not exists for this workdir we will to find the last commit by the files changes, so we will iterate on the commits.
    */
   async getDetails() {
     const [release] = await this.#getLastRelease()
+    let since
+    let tagVersion
 
     if (!release) {
-      // TODO: if there is no release in the repository for this workdir we need to take the last commit and set this commit as first release?
-      throw new Error('new repo')
+      const response = await this.#getDetailsFromLastCommit()
+      since = response.since
+      tagVersion = response.tagVersion
+    } else {
+      since = this.#extractCommitDate(release.body)
+      if (since === null) {
+        since = release.created_at
+      }
+      tagVersion = release.tag_name.split('-')[0]
     }
-    let since = this.#extractCommitDate(release.body)
-    if (since === null) {
-      since = release.created_at
-    }
+
     const commits = await this.#getCommitsByDate(since)
     const results = commits.reduce((acc, { sha: currentSha, html_url, commit }) => {
         acc.push({
@@ -215,8 +272,7 @@ class Github {
         })
       return acc
     }, [])
-
-    return { commits: results, tag: release.tag_name.split('-')[0] }
+    return { commits: results, tag: tagVersion }
   }
 
 }

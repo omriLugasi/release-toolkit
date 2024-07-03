@@ -17,7 +17,7 @@ class EntryPoint {
     const { affectedCommits, newTag } = commitResolver(tag, commits)
     if (!affectedCommits.length) {
       // TODO: improve this message
-      console.log('No affected commits found.')
+      console.log(`No affected commits found ${workdir.folderPath}.`)
       return
     }
 
