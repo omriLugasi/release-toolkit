@@ -160,10 +160,10 @@ class Github {
     console.log(`Creating new tag ${newTag}`)
     const createdTagResponse = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/tags`, {
       tag: newTag,
-      message: `Create new tag ${newTag} by release sparks`,
+      message: `Create new tag ${newTag} by release toolkit`,
       tagger: {
-        name: 'release sparks',
-        email: 'release-sparks@gmail.com',
+        name: 'release toolkit',
+        email: 'release-toolkit@gmail.com',
         date: new Date().toISOString()
       },
       type: 'commit',

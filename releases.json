@@ -36,6 +36,6 @@
         "assets": [],
         "tarball_url": "https://api.github.com/repos/omriLugasi/h1-a/tarball/0.0.0-test1",
         "zipball_url": "https://api.github.com/repos/omriLugasi/h1-a/zipball/0.0.0-test1",
-        "body": "\r\nthis is an example for body of release\r\n<!--sparks metadata last commit date: 2024-06-26T21:18:33Z -->"
+        "body": "\r\nthis is an example for body of release\r\n<!--toolkit metadata last commit date: 2024-06-26T21:18:33Z -->"
     }
 ]

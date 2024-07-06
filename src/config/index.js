@@ -1,6 +1,6 @@
 
 const path = require('path')
-const { release_sparks, repository } = require(path.join(__dirname + '../../../package.json'))
+const { release_toolkit, repository } = require(path.join(__dirname + '../../../package.json'))
 let properties = {}
 
 process.argv.forEach(function (val, index, array) {
@@ -11,7 +11,7 @@ process.argv.forEach(function (val, index, array) {
 });
 
 if (!properties.config) {
-  properties = release_sparks
+  properties = release_toolkit
   properties.repository = repository
 }
 
