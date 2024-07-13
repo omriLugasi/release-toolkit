@@ -9,19 +9,39 @@
     "axios": "^1.7.2"
   },
   "release_toolkit": {
-    "branch": "main",
     "workdirs": [
       {
+        "branch": "main",
         "folderPath": "src/a",
         "id": "main",
-        "tagPattern": "{{tag}}-main",
-        "releasePattern": "Main - {{release}}"
+        "plugins": [
+          {
+            "name": "github",
+            "tagPattern": "{{tag}}-main",
+            "releasePattern": "Main - {{release}}"
+          }
+        ]
       },
       {
+        "branch": "main",
         "folderPath": "src/b",
         "id": "package-b",
-        "tagPattern": "{{tag}}-b",
-        "releasePattern": "Secondary - {{release}}"
+        "plugins": [
+          {
+            "name": "github",
+            "tagPattern": "{{tag}}-b",
+            "releasePattern": "Secondary - {{release}}"
+          }
+        ]
+      }
+    ],
+    "save": [
+      {
+        "name": "npm"
+      },
+      {
+        "name": "npm:mirroring",
+        "packageName": "@custom/my-mirroring-package-name"
       }
     ],
     "commitPatterns": [

@@ -11,6 +11,7 @@ const config = require("../../config");
 const {modifyStringByDotNotation} = require("../../utils");
 const sinon = require("sinon");
 
+
 const axiosInstance = axios.create({
   baseURL: 'https://api.github.com',
   headers: {
@@ -22,7 +23,6 @@ const axiosInstance = axios.create({
 class Github {
   #repo
   #owner
-  #branch
   #workdir
 
   constructor(workdir) {
@@ -40,8 +40,8 @@ class Github {
 
     this.#repo = 'h1-a'
     this.#owner = 'omriLugasi'
-    this.#branch = config.branch
     this.#workdir = workdir
+
   }
 
 
@@ -84,7 +84,7 @@ class Github {
   }
 
   async #findRelatedCommit() {
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#branch}`)
+    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
 
     const isRelatedToWorkdir = commit => {
       for (const file of commit.files) {
@@ -124,7 +124,7 @@ class Github {
   }
 
   async #getCommitsByDate(since){
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#branch}`)
+    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
     let commits = []
     if (this.#isCommitDateValid(response.data.commit, since)) {
       commits.push(response.data)
@@ -197,7 +197,7 @@ class Github {
     console.log(`Creating new release ${releaseName}`)
     await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/releases`, {
       tag_name: modifiedTag,
-      target_commitish: this.#branch,
+      target_commitish: this.#workdir.branch,
       name: releaseName,
       body: await this.#createChangelog(modifiedTag, commits, lastCommit),
       draft: false,
@@ -214,6 +214,7 @@ class Github {
       return new Date(acc.metadata.date).getTime() > new Date(current.metadata.date) ? acc : current
     }, null)
 
+    // TODO: remove this line when publish the first version.
     newTag = `${newTag}-${new Date().getTime()}`
 
     const modifiedTag = modifyStringByDotNotation({ tag: newTag }, this.#workdir.tagPattern)

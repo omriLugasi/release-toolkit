@@ -4,6 +4,8 @@ const config = require('./config')
 const { Github } = require('./plugins/github')
 const commitResolver = require('./commit-resolver')
 
+const GITHUB_PLUGIN_NAME = 'github'
+
 
 class EntryPoint {
 
@@ -25,7 +27,16 @@ class EntryPoint {
   }
 
   async run(workdir) {
-    this.runWithGithub(workdir)
+    for (const plugin of workdir.plugins) {
+      if (plugin.name === GITHUB_PLUGIN_NAME) {
+        const workdirData = {
+          ...workdir,
+          ...plugin,
+          plugins: undefined
+        }
+        await this.runWithGithub(workdirData)
+      }
+    }
   }
 
 
