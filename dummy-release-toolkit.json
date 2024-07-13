@@ -18,6 +18,12 @@
           {
             "name": "npm",
             "dryRun": true
+          },
+          {
+            "name": "npm:mirroring",
+            "packageName": "@custom/my-mirroring-package-name",
+            "pre": "yarn build-same-app-with-different-context",
+            "dryRun": true
           }
         ]
       }

@@ -4,10 +4,12 @@ const config = require('./config')
 const { Github } = require('./plugins/github')
 const commitResolver = require('./commit-resolver')
 const {NpmPublish} = require("./plugins/npm");
+const {NpmMirror} = require("./plugins/npm/mirror");
 const {WorkdirContext} = require("./utils/context");
 
 const GITHUB_PLUGIN_NAME = 'github'
 const NPM_PUBLISH_PLUGIN_NAME = 'npm'
+const NPM_MIRROR_PLUGIN_NAME = 'npm:mirroring'
 
 
 class EntryPoint {
@@ -45,6 +47,16 @@ class EntryPoint {
     await npmInstance.publish()
   }
 
+
+  async runWithNpmMirror(workdir) {
+    const shouldRunPlugin = workdir.context.get(WorkdirContext.GITHUB_STATUS_FIELD_NAME) === Github.STATUS_SUCCESS
+    if (!shouldRunPlugin) {
+      return
+    }
+    const instance = new NpmMirror(workdir)
+    await instance.runMirroring()
+  }
+
   async run(workdir) {
     workdir.context = new WorkdirContext()
     for (const plugin of workdir.plugins) {
@@ -57,6 +69,8 @@ class EntryPoint {
         await this.runWithGithub(workdirData)
       } else if (plugin.name === NPM_PUBLISH_PLUGIN_NAME) {
         await this.runWithNpmPublish(workdirData)
+      } else if (plugin.name === NPM_MIRROR_PLUGIN_NAME) {
+        await this.runWithNpmMirror(workdirData)
       }
     }
   }
