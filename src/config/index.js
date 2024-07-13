@@ -1,10 +1,8 @@
 
 const path = require('path')
 
-const { release_toolkit } = require(path.join(process.cwd(), 'release-toolkit.json'))
+const configuration = require(path.join(process.cwd(), 'release-toolkit.json'))
 
-let properties = {
-  release_toolkit
-}
+let properties = configuration
 
 module.exports = properties

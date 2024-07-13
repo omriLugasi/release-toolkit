@@ -30,7 +30,7 @@ class Github {
   #workdir
 
   constructor(workdir) {
-    const { repo, owner } = config.release_toolkit.repository
+    const { repo, owner } = config.repository
 
     this.#repo = repo
     this.#owner = owner

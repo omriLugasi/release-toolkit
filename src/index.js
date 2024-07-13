@@ -34,12 +34,12 @@ class EntryPoint {
      * @description
      * Set the new tag value of the context for further usage.
      */
-    workdir.context.set(WorkdirContext.TAG_FIELD_NAME, newTag)
-    workdir.context.set(WorkdirContext.GITHUB_STATUS_FIELD_NAME, Github.STATUS_SUCCESS)
+    workdir.__workdir_context__.set(WorkdirContext.TAG_FIELD_NAME, newTag)
+    workdir.__workdir_context__.set(WorkdirContext.GITHUB_STATUS_FIELD_NAME, Github.STATUS_SUCCESS)
   }
 
   async runWithNpmPublish(workdir) {
-    const shouldRunPlugin = workdir.context.get(WorkdirContext.GITHUB_STATUS_FIELD_NAME) === Github.STATUS_SUCCESS
+    const shouldRunPlugin = workdir.__workdir_context__.get(WorkdirContext.GITHUB_STATUS_FIELD_NAME) === Github.STATUS_SUCCESS
     if (!shouldRunPlugin) {
       return
     }
@@ -49,7 +49,7 @@ class EntryPoint {
 
 
   async runWithNpmMirror(workdir) {
-    const shouldRunPlugin = workdir.context.get(WorkdirContext.GITHUB_STATUS_FIELD_NAME) === Github.STATUS_SUCCESS
+    const shouldRunPlugin = workdir.__workdir_context__.get(WorkdirContext.GITHUB_STATUS_FIELD_NAME) === Github.STATUS_SUCCESS
     if (!shouldRunPlugin) {
       return
     }
@@ -58,7 +58,7 @@ class EntryPoint {
   }
 
   async run(workdir) {
-    workdir.context = new WorkdirContext()
+    workdir.__workdir_context__ = new WorkdirContext()
     for (const plugin of workdir.plugins) {
       const workdirData = {
         ...workdir,
@@ -79,7 +79,7 @@ class EntryPoint {
   async init() {
 
 
-    for (const workdir of config.release_toolkit.workdirs) {
+    for (const workdir of config.workdirs) {
       await this.run(workdir)
     }
   }

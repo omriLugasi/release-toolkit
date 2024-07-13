@@ -27,7 +27,7 @@ class NpmPublish {
   }
 
   async changePackageJsonVersion(workdirPath) {
-    const newVersion = this.#workdir.context.get(WorkdirContext.TAG_FIELD_NAME)
+    const newVersion = this.#workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)
     const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
     const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
     const newPackageJson = JSON.parse(packageJson)
