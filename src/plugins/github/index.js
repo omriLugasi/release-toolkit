@@ -21,25 +21,19 @@ const axiosInstance = axios.create({
 })
 
 class Github {
+
+  static STATUS_FAILED = 'failed'
+  static STATUS_SUCCESS = 'success'
+
   #repo
   #owner
   #workdir
 
   constructor(workdir) {
-    const { repo, owner } = config.repository.startsWith('git@') ? {
-      owner: config.repository.split(':')[1].split('/')[0],
-      repo: config.repository.split(':')[1].split('/')[1].replace('.git', '')
-    } : {
-      owner: config.repository.replace('https://github.com/', '').split('/')[0],
-      repo: config.repository.replace('https://github.com/', '').split('/')[1].replace('.git', '')
-    }
+    const { repo, owner } = config.release_toolkit.repository
 
-    // this.#repo = repo
-    // this.#owner = owner
-
-
-    this.#repo = 'h1-a'
-    this.#owner = 'omriLugasi'
+    this.#repo = repo
+    this.#owner = owner
     this.#workdir = workdir
 
   }

@@ -40,7 +40,7 @@ module.exports = (tag, commits) => {
   for (const commit of commits) {
     const { message } = commit
     let fitPatterns = false
-    for (const { pattern, upgrade, title } of config.commitPatterns) {
+    for (const { pattern, upgrade, title } of config.release_toolkit.commitPatterns) {
       const regex = new RegExp(pattern)
       if (regex.test(message) && versions[upgrade] !== versions.ignore) {
         affectedCommits.push({ ...commit, metadata: { ...commit.metadata, title: title } })

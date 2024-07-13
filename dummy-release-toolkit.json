@@ -1,0 +1,68 @@
+{
+  "release_toolkit": {
+    "repository": {
+      "repo": "h1-a",
+      "owner": "omriLugasi"
+    },
+    "workdirs": [
+      {
+        "branch": "main",
+        "folderPath": "src/a",
+        "id": "main",
+        "plugins": [
+          {
+            "name": "github",
+            "tagPattern": "{{tag}}-main",
+            "releasePattern": "Main - {{release}}"
+          },
+          {
+            "name": "npm",
+            "dryRun": true
+          }
+        ]
+      }
+    ],
+    "save": [
+      {
+        "name": "npm"
+      },
+      {
+        "name": "npm:mirroring",
+        "packageName": "@custom/my-mirroring-package-name"
+      },
+      {
+        "branch": "main",
+        "folderPath": "src/b",
+        "id": "package-b",
+        "plugins": [
+          {
+            "name": "github",
+            "tagPattern": "{{tag}}-b",
+            "releasePattern": "Secondary - {{release}}"
+          }
+        ]
+      }
+    ],
+    "commitPatterns": [
+      {
+        "pattern": "^refactor\\(\\):",
+        "upgrade": "major",
+        "title": "Refeactor!"
+      },
+      {
+        "pattern": "^feat\\(\\):",
+        "upgrade": "minor",
+        "title": "Features"
+      },
+      {
+        "pattern": "^chore\\(\\):",
+        "upgrade": "build",
+        "title": "Chores"
+      },
+      {
+        "pattern": "^ignore\\(\\):",
+        "upgrade": "ignore"
+      }
+    ]
+  }
+}

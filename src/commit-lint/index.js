@@ -12,14 +12,14 @@ const readFileContent = () => {
 const init = async () => {
   const commitMessage = (await readFileContent()).toString()
 
-  for (const { pattern } of config.commitPatterns) {
+  for (const { pattern } of config.release_toolkit.commitPatterns) {
     const regex = new RegExp(pattern)
     if (regex.test(commitMessage)) {
       process.exit(0)
     }
   }
   console.log(`
-    Commit did not fit any of the provided patterns "${config.commitPatterns.map(item => item.pattern).join(' | ')}".
+    Commit did not fit any of the provided patterns "${config.release_toolkit.commitPatterns.map(item => item.pattern).join(' | ')}".
     
     Commit message:
       ${commitMessage}

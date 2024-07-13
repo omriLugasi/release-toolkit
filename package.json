@@ -1,70 +1,12 @@
 {
   "name": "release-toolkit",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": "git@github.com:omriLugasi/release-toolkit.git",
   "author": "omri luggasi",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.7.2"
-  },
-  "release_toolkit": {
-    "workdirs": [
-      {
-        "branch": "main",
-        "folderPath": "src/a",
-        "id": "main",
-        "plugins": [
-          {
-            "name": "github",
-            "tagPattern": "{{tag}}-main",
-            "releasePattern": "Main - {{release}}"
-          }
-        ]
-      },
-      {
-        "branch": "main",
-        "folderPath": "src/b",
-        "id": "package-b",
-        "plugins": [
-          {
-            "name": "github",
-            "tagPattern": "{{tag}}-b",
-            "releasePattern": "Secondary - {{release}}"
-          }
-        ]
-      }
-    ],
-    "save": [
-      {
-        "name": "npm"
-      },
-      {
-        "name": "npm:mirroring",
-        "packageName": "@custom/my-mirroring-package-name"
-      }
-    ],
-    "commitPatterns": [
-      {
-        "pattern": "^refactor\\(\\):",
-        "upgrade": "major",
-        "title": "Refeactor!"
-      },
-      {
-        "pattern": "^feat\\(\\):",
-        "upgrade": "minor",
-        "title": "Features"
-      },
-      {
-        "pattern": "^chore\\(\\):",
-        "upgrade": "build",
-        "title": "Chores"
-      },
-      {
-        "pattern": "^ignore\\(\\):",
-        "upgrade": "ignore"
-      }
-    ]
   },
   "devDependencies": {
     "chai": "^5.1.1",
