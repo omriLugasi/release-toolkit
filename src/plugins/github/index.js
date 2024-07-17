@@ -208,9 +208,6 @@ class Github {
       return new Date(acc.metadata.date).getTime() > new Date(current.metadata.date) ? acc : current
     }, null)
 
-    // TODO: remove this line when publish the first version.
-    newTag = `${newTag}-${new Date().getTime()}`
-
     const modifiedTag = modifyStringByDotNotation({ tag: newTag }, this.#workdir.tagPattern)
 
     await this.#createTag(modifiedTag, lastCommit.metadata.hash)

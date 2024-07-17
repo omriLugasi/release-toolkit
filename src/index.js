@@ -23,8 +23,7 @@ class EntryPoint {
     const { commits, tag } = await github.getDetails()
     const { affectedCommits, newTag } = commitResolver(tag, commits)
     if (!affectedCommits.length) {
-      // TODO: improve this message
-      console.log(`No affected commits found ${workdir.folderPath}.`)
+      console.log(`[workdir: "${workdir.folderPath}"] - No changes found. No action taken.`)
       return
     }
 
