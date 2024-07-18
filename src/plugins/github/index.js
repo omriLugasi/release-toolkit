@@ -8,7 +8,7 @@
 
 const axios = require("axios");
 const config = require("../../config");
-const {modifyStringByDotNotation} = require("../../utils");
+const {modifyStringByDotNotation, GITHUB_PLUGIN_NAME} = require("../../utils");
 const sinon = require("sinon");
 
 
@@ -151,7 +151,6 @@ class Github {
   }
 
   async #createTag(newTag, commitHash) {
-    console.log(`Creating new tag ${newTag}`)
     const createdTagResponse = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/tags`, {
       tag: newTag,
       message: `Create new tag ${newTag} by release toolkit`,
@@ -167,6 +166,11 @@ class Github {
     await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/refs`, {
       ref: `refs/tags/${newTag}`,
       sha: createdTagResponse.data.sha
+    })
+    this.#workdir.__workdir_logger__.log({
+      plugin: GITHUB_PLUGIN_NAME,
+      description: `Published a new tag "${newTag}"`,
+      comment: `https://github.com/${this.#owner}/${this.#repo}/tree/${newTag}`
     })
   }
 
@@ -188,8 +192,8 @@ class Github {
 
   async #createRelease(modifiedTag, newTag, commits, lastCommit) {
     const releaseName = modifyStringByDotNotation({ release: newTag }, this.#workdir.releasePattern)
-    console.log(`Creating new release ${releaseName}`)
-    await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/releases`, {
+
+    const response = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/releases`, {
       tag_name: modifiedTag,
       target_commitish: this.#workdir.branch,
       name: releaseName,
@@ -198,6 +202,13 @@ class Github {
       prerelease: false,
       generate_release_notes: false
     })
+
+    this.#workdir.__workdir_logger__.log({
+      plugin: GITHUB_PLUGIN_NAME,
+      description: `Published a new release "${releaseName}"`,
+      comment: response.data.html_url
+    })
+    return response.data.html_url
   }
 
   async release(newTag, commits) {
