@@ -1,6 +1,4 @@
-// this file will be the entry point of the package.
-
-const config = require('./config')
+const { configService, Config } = require('./config')
 const { LogManager, GITHUB_PLUGIN_NAME, NPM_PUBLISH_PLUGIN_NAME, NPM_MIRROR_PLUGIN_NAME} = require('./utils')
 const { Github } = require('./plugins/github')
 const commitResolver = require('./commit-resolver')
@@ -10,10 +8,6 @@ const {WorkdirContext} = require("./utils/context");
 
 
 class EntryPoint {
-
-  constructor() {
-    this.init()
-  }
 
   async runWithGithub(workdir) {
     const github = new Github(workdir)
@@ -112,14 +106,28 @@ class EntryPoint {
   }
 
 
-
+  /**
+   * @description
+   * EntryPoint.
+   * Init the config service, validate the workdirs property from the config and run the flow.
+   */
   async init() {
-    for (const workdir of config.workdirs) {
+    await configService.init()
+
+    const workdirs = configService.get(Config.WORKDIRS_KEY)
+    if (workdirs.length === 0) {
+      console.error('No workdirs found, please add "workdirs" property in your release toolkit file.')
+      return
+    }
+    for (const workdir of configService.get(Config.WORKDIRS_KEY)) {
       await this.run(workdir)
     }
   }
 
 }
 
-
-new EntryPoint()
+if (process.env.NODE_ENV === 'test') {
+  module.exports = EntryPoint
+} else {
+  new EntryPoint().init()
+}

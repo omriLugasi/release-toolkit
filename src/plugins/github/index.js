@@ -7,18 +7,8 @@
  */
 
 const axios = require("axios");
-const config = require("../../config");
+const { configService } = require("../../config");
 const {modifyStringByDotNotation, GITHUB_PLUGIN_NAME} = require("../../utils");
-const sinon = require("sinon");
-
-
-const axiosInstance = axios.create({
-  baseURL: 'https://api.github.com',
-  headers: {
-    'X-GitHub-Api-Version': '2022-11-28',
-    'Authorization': `Bearer ${process.env.NPM_TOKEN}`
-  }
-})
 
 class Github {
 
@@ -28,13 +18,22 @@ class Github {
   #repo
   #owner
   #workdir
+  #axiosInstance
 
   constructor(workdir) {
-    const { repo, owner } = config.repository
+    const { repo, owner } = configService.get('repository')
 
     this.#repo = repo
     this.#owner = owner
     this.#workdir = workdir
+
+    this.#axiosInstance = axios.create({
+      baseURL: 'https://api.github.com',
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Authorization': `Bearer ${process.env.NPM_TOKEN}`
+      }
+    })
 
   }
 
@@ -61,7 +60,7 @@ class Github {
    * Find the last release that related to the workdir
    */
   async #getLastRelease({ page } = { page: 1 }) {
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/releases?per_page=30&page=${page}`)
+    const response = await this.#axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/releases?per_page=30&page=${page}`)
     if (!Array.isArray(response.data) || !response.data.length) {
       return []
     }
@@ -78,7 +77,7 @@ class Github {
   }
 
   async #findRelatedCommit() {
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
+    const response = await this.#axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
 
     const isRelatedToWorkdir = commit => {
       for (const file of commit.files) {
@@ -94,7 +93,7 @@ class Github {
     }
 
     const reviewNextCommit = async (url) => {
-      const { data: commit } = await axiosInstance.get(url)
+      const { data: commit } = await this.#axiosInstance.get(url)
 
         if (isRelatedToWorkdir(commit)) {
           return commit.commit.committer.date
@@ -118,12 +117,12 @@ class Github {
   }
 
   async #getCommitsByDate(since){
-    const response = await axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
+    const response = await this.#axiosInstance.get(`/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`)
     let commits = []
     if (this.#isCommitDateValid(response.data.commit, since)) {
       commits.push(response.data)
       const reviewNextCommit = async (url) => {
-        const { data: commit } = await axiosInstance.get(url)
+        const { data: commit } = await this.#axiosInstance.get(url)
         if (this.#isCommitDateValid(commit.commit, since)) {
           commits.push(commit)
           if (Array.isArray(commit.parents) && commit.parents.length && commit.parents[0].url) {
@@ -151,7 +150,7 @@ class Github {
   }
 
   async #createTag(newTag, commitHash) {
-    const createdTagResponse = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/tags`, {
+    const createdTagResponse = await this.#axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/tags`, {
       tag: newTag,
       message: `Create new tag ${newTag} by release toolkit`,
       tagger: {
@@ -163,7 +162,7 @@ class Github {
       object: commitHash
     })
 
-    await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/refs`, {
+    await this.#axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/git/refs`, {
       ref: `refs/tags/${newTag}`,
       sha: createdTagResponse.data.sha
     })
@@ -193,7 +192,7 @@ class Github {
   async #createRelease(modifiedTag, newTag, commits, lastCommit) {
     const releaseName = modifyStringByDotNotation({ release: newTag }, this.#workdir.releasePattern)
 
-    const response = await axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/releases`, {
+    const response = await this.#axiosInstance.post(`/repos/${this.#owner}/${this.#repo}/releases`, {
       tag_name: modifiedTag,
       target_commitish: this.#workdir.branch,
       name: releaseName,
