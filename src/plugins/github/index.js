@@ -7,8 +7,10 @@
  */
 
 const axios = require("axios");
+const axiosRetry = require('axios-retry').default
 const { configService } = require("../../config");
 const {modifyStringByDotNotation, GITHUB_PLUGIN_NAME} = require("../../utils");
+
 
 class Github {
 
@@ -34,7 +36,7 @@ class Github {
         'Authorization': `Bearer ${process.env.NPM_TOKEN}`
       }
     })
-
+    axiosRetry(this.#axiosInstance, { retries: 5 });
   }
 
 
@@ -261,6 +263,7 @@ class Github {
     }
 
     const commits = await this.#getCommitsByDate(since)
+    console.log(JSON.stringify(commits, null, 2))
     const results = commits.reduce((acc, { sha: currentSha, html_url, commit }) => {
         acc.push({
           message: commit.message,

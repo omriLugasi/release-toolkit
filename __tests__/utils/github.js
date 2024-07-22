@@ -11,7 +11,8 @@ class GithubMock {
     constructor(sandbox) {
         sandbox.stub(axios.Axios.prototype, 'get').callsFake((url, config) => {
             if (url.includes('/releases')) {
-                return { data: [this.releaseResponse.shift()()] }
+                const func = this.releaseResponse.shift()
+                return { data: func ? [func()] : [] }
             }
             else if (url.includes('/commits')) {
                 return { data: this.commits.shift()() }
@@ -19,7 +20,6 @@ class GithubMock {
         })
 
         sandbox.stub(axios.Axios.prototype, 'post').callsFake((url, data) => {
-            console.log({url, data })
             if (url.endsWith('/git/tags')) {
                 this.tagData = data
                 return { data: { sha: 'this-is-a-sha-string' } }
@@ -32,16 +32,19 @@ class GithubMock {
 
     setFlow({
                 lastReleaseDate,
+                releaseBody,
                 newReleaseDate,
                 workdir,
                 commitMessages
             } = {}) {
 
-        const release = this.generateRelease(lastReleaseDate, workdir.id)
-        this.onNextReleaseRequested(release)
+        // if lastReleaseDate and releaseBody not supplied do not sign release to the flow
+        if (lastReleaseDate || releaseBody) {
+            const release = this.generateRelease(lastReleaseDate, releaseBody, workdir.id)
+            this.onNextReleaseRequested(release)
+        }
 
         let index = 0
-        const now = new Date()
 
         for (const commitMessage of commitMessages) {
             let cmt = this.generateCommitResponse()
@@ -148,7 +151,7 @@ class GithubMock {
         }
     }
 
-    generateRelease(releaseDate, workdirId) {
+    generateRelease(releaseDate, releaseBody, workdirId) {
         return {
             "url": "https://api.github.com/repos/onwerName/repoName/releases/162853025",
             "assets_url": "https://api.github.com/repos/onwerName/repoName/releases/162853025/assets",
@@ -186,7 +189,7 @@ class GithubMock {
             "assets": [],
             "tarball_url": "https://api.github.com/repos/onwerName/repoName/tarball/0.0.0-test1",
             "zipball_url": "https://api.github.com/repos/onwerName/repoName/zipball/0.0.0-test1",
-            "body": `
+            "body": releaseBody || `
                 <!--metadata:last-commit:start ${releaseDate} metadata:last-commit:end-->
                 
                 <!--metadata:workdir-id:start ${workdirId} metadata:workdir-id:end-->            
