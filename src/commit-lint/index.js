@@ -1,4 +1,4 @@
-const { configService } = require('./../config')
+const { configService, Config } = require('./../config')
 const fs = require('fs')
 const { promisify } = require('util')
 
@@ -20,12 +20,12 @@ const init = async () => {
       process.exit(0)
     }
   }
-  console.log(`
-    Commit did not fit any of the provided patterns "${configService.get(Config.COMMIT_PATTERNS_KEY).map(item => item.pattern).join(' | ')}".
-    
-    Commit message:
-      ${commitMessage}
-  `)
+  console.table([
+    {
+      'Commit Message': commitMessage,
+      Error: `Commit did not fit any of the provided patterns "${configService.get(Config.COMMIT_PATTERNS_KEY).map(item => item.pattern).join(' | ')}".`
+    }
+  ])
   process.exit(1)
 }
 
