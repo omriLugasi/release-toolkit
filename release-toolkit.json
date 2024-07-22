@@ -6,22 +6,16 @@
   "workdirs": [
     {
       "branch": "main",
-      "folderPath": "src/a",
+      "folderPath": "src",
       "id": "main",
       "plugins": [
         {
           "name": "github",
-          "tagPattern": "{{tag}}-main",
-          "releasePattern": "Main - {{release}}"
+          "tagPattern": "{{tag}}",
+          "releasePattern": "{{release}}"
         },
         {
           "name": "npm",
-          "dryRun": true
-        },
-        {
-          "name": "npm:mirroring",
-          "packageName": "@custom/my-mirroring-package-name",
-          "pre": "yarn build-same-app-with-different-context",
           "dryRun": true
         }
       ]
