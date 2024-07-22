@@ -263,7 +263,6 @@ class Github {
     }
 
     const commits = await this.#getCommitsByDate(since)
-    console.log(JSON.stringify(commits, null, 2))
     const results = commits.reduce((acc, { sha: currentSha, html_url, commit }) => {
         acc.push({
           message: commit.message,

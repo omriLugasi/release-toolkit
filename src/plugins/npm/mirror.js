@@ -43,7 +43,6 @@ class NpmMirror {
           rej(err);
           return;
         }
-        console.log(stdout)
         res(stdout);
       })
     })

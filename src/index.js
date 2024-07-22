@@ -41,11 +41,20 @@ class EntryPoint {
       return
     }
     const npmInstance = new NpmPublish(workdir)
-    await npmInstance.publish()
-    workdir.__workdir_logger__.log({
-      plugin: NPM_PUBLISH_PLUGIN_NAME,
-      description: `publish successfully a new version (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`
-    })
+    try {
+      await npmInstance.publish()
+      workdir.__workdir_logger__.log({
+        plugin: NPM_PUBLISH_PLUGIN_NAME,
+        description: `publish successfully a new version (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`,
+        comment: workdir.dryRun ? 'DRY RUN' : ''
+      })
+    } catch(e) {
+      workdir.__workdir_logger__.log({
+        plugin: NPM_PUBLISH_PLUGIN_NAME,
+        description: `publish failed for (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`,
+        comment: `Error: ${e.message}`
+      })
+    }
   }
 
 
