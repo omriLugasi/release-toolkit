@@ -2,4 +2,4 @@
 
 echo $PWD
 
-node "$PWD/src/commit-lint/index.js" $1
+node $PWD/src/commit-lint/index.js $1
