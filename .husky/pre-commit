@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+echo $PWD
+
+node "$PWD/src/commit-lint/index.js" $1
