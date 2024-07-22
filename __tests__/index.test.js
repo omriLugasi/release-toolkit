@@ -19,6 +19,11 @@ const basicGithubPlugin = {
 const basicNpmPlugin = {
     "name": "npm"
 }
+const basicNpmMirroringPlugin = {
+    "name": "npm:mirroring",
+    "packageName": "@custom/my-mirroring-package-name",
+    "pre": "yarn build-same-app-with-different-context",
+}
 
 const basicConfiguration = {
     repository: {
@@ -666,15 +671,290 @@ describe('Main', () => {
 
     })
     describe('NPM mirroring plugin', () => {
+        context('When Github and NPM mirroring Plugins provided with simple scenario', () => {
+
+            const sandbox = sinon.createSandbox()
+            const workdir = {
+                ...basicWorkdirObject,
+                id: 'github_npm:mirroring_10',
+                plugins: [basicGithubPlugin, basicNpmMirroringPlugin]
+            }
+            const commitMessages = [
+                'chore(): an example for commit message',
+                'feat(): an example for commit message',
+            ]
+            let githubMock
+            let childProcessExec
+            let fsReadFile
+            let fsWriteFile
+            const nowDate = new Date()
+            const releaseDate = new Date(new Date(nowDate).setMinutes(nowDate.getMinutes() + 2))
+
+            before(async () => {
+                sandbox.useFakeTimers({
+                    now: nowDate.getTime()
+                })
+                githubMock = githubMock = new GithubMock(sandbox)
+                const configMock = new ConfigMock(sandbox)
+                configMock.setConfiguration({
+                    ...basicConfiguration,
+                    workdirs: [workdir]
+                })
+
+                githubMock.setFlow({
+                    lastReleaseDate: nowDate.toISOString(),
+                    workdir,
+                    commitMessages,
+                    newReleaseDate: releaseDate.toISOString()
+                })
+
+                childProcessExec = sandbox.stub(child_process, 'exec').callsFake((command, callback) => {
+                    callback(null, 'some response from child process')
+                })
+                fsReadFile = sandbox.stub(fs, 'readFile').callsFake((path, encode, callback) => {
+                    callback(null, JSON.stringify({ version: '0.0.0', name: 'release-toolkit' }))
+                })
+                fsWriteFile = sandbox.stub(fs, 'writeFile').callsFake((path, newContent, callback) => {
+                    callback(null)
+                })
+                await new EntryPoint().init()
+            })
+
+            after(() => {
+                sandbox.restore()
+            })
+
+            it('should create a new release according to the template', () => {
+                assert.strictEqual(githubMock.getCreatedRelease().name, 'Main - 0.1.0')
+            })
+
+
+            it('should use read file function to get package json file content', () => {
+                assert.strictEqual(fsReadFile.args[0][0].endsWith('/package.json'), true)
+            })
+
+            it('should use write file function to update package json file content', () => {
+                assert.strictEqual(fsWriteFile.args[0][0].endsWith('/package.json'), true)
+            })
+
+            it('should use write file function to update package json file with the right content (package name)', () => {
+                assert.strictEqual(fsWriteFile.args[0][1].includes(`"name": "${basicNpmMirroringPlugin.packageName}"`), true)
+            })
+
+            it('should use exec function to run pre npm publish', () => {
+                assert.strictEqual(childProcessExec.args[0][0].endsWith(basicNpmMirroringPlugin.pre), true)
+            })
+
+            it('should use exec function to npm publish', () => {
+                assert.strictEqual(childProcessExec.args[1][0].endsWith('/src/mock && npm publish'), true)
+            })
+
+            it('should called twice to exec function', () => {
+                assert.strictEqual(childProcessExec.callCount, 2)
+            })
+
+        })
+
+        context('When Github and NPM mirroring Plugins provided with no publish needed scenario', () => {
+
+            const sandbox = sinon.createSandbox()
+            const workdir = {
+                ...basicWorkdirObject,
+                id: 'github_npm:mirroring_11',
+                plugins: [basicGithubPlugin, basicNpmMirroringPlugin]
+            }
+            const commitMessages = [
+                'wrong(): an example for commit message',
+                'wrong(): an example for commit message',
+            ]
+            let githubMock
+            let childProcessExec
+            let fsReadFile
+            let fsWriteFile
+            const nowDate = new Date()
+            const releaseDate = new Date(new Date(nowDate).setMinutes(nowDate.getMinutes() + 2))
+
+            before(async () => {
+                sandbox.useFakeTimers({
+                    now: nowDate.getTime()
+                })
+                githubMock = githubMock = new GithubMock(sandbox)
+                const configMock = new ConfigMock(sandbox)
+                configMock.setConfiguration({
+                    ...basicConfiguration,
+                    workdirs: [workdir]
+                })
+
+                githubMock.setFlow({
+                    lastReleaseDate: nowDate.toISOString(),
+                    workdir,
+                    commitMessages,
+                    newReleaseDate: releaseDate.toISOString()
+                })
+
+                childProcessExec = sandbox.stub(child_process, 'exec').callsFake((command, callback) => {
+                    callback(null, 'some response from child process')
+                })
+                fsReadFile = sandbox.stub(fs, 'readFile').callsFake((path, encode, callback) => {
+                    callback(null, JSON.stringify({ version: '0.0.0', name: 'release-toolkit' }))
+                })
+                fsWriteFile = sandbox.stub(fs, 'writeFile').callsFake((path, newContent, callback) => {
+                    callback(null)
+                })
+                await new EntryPoint().init()
+            })
+
+            after(() => {
+                sandbox.restore()
+            })
+
+            it('should not publish new release or tag', () => {
+                assert.strictEqual(githubMock.getCreatedRelease(), null)
+            })
+
+            it('should not called write file function', () => {
+                assert.strictEqual(fsWriteFile.callCount, 0)
+            })
+
+            it('should not called read file function', () => {
+                assert.strictEqual(fsReadFile.callCount, 0)
+            })
+
+            it('should not called once to exec function', () => {
+                assert.strictEqual(childProcessExec.callCount, 0)
+            })
+
+        })
+
+        context('When Github and NPM mirroring Plugins provided with pre script failed scenario', () => {
+
+            const sandbox = sinon.createSandbox()
+            const workdir = {
+                ...basicWorkdirObject,
+                id: 'github_npm:mirroring_12',
+                plugins: [basicGithubPlugin, basicNpmMirroringPlugin]
+            }
+            const commitMessages = [
+                'chore(): an example for commit message',
+                'feat(): an example for commit message',
+            ]
+            let githubMock
+            let childProcessExec
+            const nowDate = new Date()
+            const releaseDate = new Date(new Date(nowDate).setMinutes(nowDate.getMinutes() + 2))
+
+            before(async () => {
+                sandbox.useFakeTimers({
+                    now: nowDate.getTime()
+                })
+                githubMock = githubMock = new GithubMock(sandbox)
+                const configMock = new ConfigMock(sandbox)
+                configMock.setConfiguration({
+                    ...basicConfiguration,
+                    workdirs: [workdir]
+                })
+
+                githubMock.setFlow({
+                    lastReleaseDate: nowDate.toISOString(),
+                    workdir,
+                    commitMessages,
+                    newReleaseDate: releaseDate.toISOString()
+                })
+
+                childProcessExec = sandbox.stub(child_process, 'exec').callsFake((command, callback) => {
+                    callback(new Error('this is a custom error message'))
+                })
+
+                await new EntryPoint().init()
+            })
+
+            after(() => {
+                sandbox.restore()
+            })
+
+            it('should create a new release according to the template', () => {
+                assert.strictEqual(githubMock.getCreatedRelease().name, 'Main - 0.1.0')
+            })
+
+            it('should use exec function to run pre npm publish', () => {
+                assert.strictEqual(childProcessExec.args[0][0].endsWith(basicNpmMirroringPlugin.pre), true)
+            })
+
+            it('should called twice to exec function', () => {
+                assert.strictEqual(childProcessExec.callCount, 1)
+            })
+
+        })
+
+        context('When Github and NPM (dry run) mirroring Plugins provided with simple scenario', () => {
+
+            const sandbox = sinon.createSandbox()
+            const workdir = {
+                ...basicWorkdirObject,
+                id: 'github_npm:mirroring_10',
+                plugins: [basicGithubPlugin, { ...basicNpmMirroringPlugin, dryRun: true }]
+            }
+            const commitMessages = [
+                'chore(): an example for commit message',
+                'feat(): an example for commit message',
+            ]
+            let githubMock
+            let childProcessExec
+            const nowDate = new Date()
+            const releaseDate = new Date(new Date(nowDate).setMinutes(nowDate.getMinutes() + 2))
+
+            before(async () => {
+                sandbox.useFakeTimers({
+                    now: nowDate.getTime()
+                })
+                githubMock = githubMock = new GithubMock(sandbox)
+                const configMock = new ConfigMock(sandbox)
+                configMock.setConfiguration({
+                    ...basicConfiguration,
+                    workdirs: [workdir]
+                })
+
+                githubMock.setFlow({
+                    lastReleaseDate: nowDate.toISOString(),
+                    workdir,
+                    commitMessages,
+                    newReleaseDate: releaseDate.toISOString()
+                })
+
+                childProcessExec = sandbox.stub(child_process, 'exec').callsFake((command, callback) => {
+                    callback(null, 'some response from child process')
+                })
+                sandbox.stub(fs, 'readFile').callsFake((path, encode, callback) => {
+                    callback(null, JSON.stringify({ version: '0.0.0', name: 'release-toolkit' }))
+                })
+                sandbox.stub(fs, 'writeFile').callsFake((path, newContent, callback) => {
+                    callback(null)
+                })
+                await new EntryPoint().init()
+            })
+
+            after(() => {
+                sandbox.restore()
+            })
+
+            it('should create a new release according to the template', () => {
+                assert.strictEqual(githubMock.getCreatedRelease().name, 'Main - 0.1.0')
+            })
+
+            it('should use exec function to npm publish', () => {
+                assert.strictEqual(childProcessExec.args[1][0].endsWith('/src/mock && npm publish --dry-run'), true)
+            })
+
+            it('should called twice to exec function', () => {
+                assert.strictEqual(childProcessExec.callCount, 2)
+            })
+
+        })
         // when no publish needed
         // when publish pass successfuly
         // when duplication in publish
         // when dry run
         // when publish failed (504?)
-    })
-
-    describe('Combination of plugins', () => {
-        // combination and validation for all plugins
     })
 
 })

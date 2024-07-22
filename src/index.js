@@ -67,13 +67,20 @@ class EntryPoint {
       })
       return
     }
-    const instance = new NpmMirror(workdir)
-    await instance.runMirroring()
-
-    workdir.__workdir_logger__.log({
-      plugin: NPM_MIRROR_PLUGIN_NAME,
-      description: `publish successfully a new version (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`,
-    })
+    try {
+      const instance = new NpmMirror(workdir)
+      await instance.runMirroring()
+      workdir.__workdir_logger__.log({
+        plugin: NPM_MIRROR_PLUGIN_NAME,
+        description: `publish successfully a new version (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`,
+      })
+    } catch(e) {
+      workdir.__workdir_logger__.log({
+        plugin: NPM_MIRROR_PLUGIN_NAME,
+        description: `publish failed for (${workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)})`,
+        comment: `Error: ${e.message}`
+      })
+    }
   }
 
   async run(workdir) {
