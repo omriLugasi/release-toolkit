@@ -1,4 +1,4 @@
-const { configService } =require('./../config')
+const { configService } = require('./../config')
 const fs = require('fs')
 const { promisify } = require('util')
 
@@ -10,6 +10,8 @@ const readFileContent = () => {
 }
 
 const init = async () => {
+  await configService.init()
+
   const commitMessage = (await readFileContent()).toString()
 
   for (const { pattern } of configService.get(Config.COMMIT_PATTERNS_KEY)) {
