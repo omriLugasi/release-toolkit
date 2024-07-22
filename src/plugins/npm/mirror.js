@@ -1,11 +1,8 @@
 
-const { exec } = require('node:child_process');
+const childProcess = require('node:child_process');
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
-
-const readAsync = promisify(fs.readFile)
-const writeAsync = promisify(fs.writeFile)
 const {NpmPublish} = require("./index");
 
 /**
@@ -25,6 +22,8 @@ class NpmMirror {
   }
 
   async changePackageJsonName(workdirPath) {
+    const readAsync = promisify(fs.readFile)
+    const writeAsync = promisify(fs.writeFile)
     const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
     const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
     const newPackageJson = JSON.parse(packageJson)
@@ -38,12 +37,11 @@ class NpmMirror {
       return
     }
     return new Promise((res, rej) => {
-      exec(`cd ${workdirPath} && ${this.#workdir.pre}`, (err, stdout, stderr) => {
+      childProcess.exec(`cd ${workdirPath} && ${this.#workdir.pre}`, (err, stdout, stderr) => {
         if (err) {
           rej(err);
           return;
         }
-        console.log(stdout)
         res(stdout);
       })
     })

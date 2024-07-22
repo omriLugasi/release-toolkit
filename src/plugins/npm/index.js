@@ -1,11 +1,8 @@
-const { exec } = require('node:child_process');
-const {WorkdirContext} = require('../../utils/context')
+const childProcess = require('node:child_process');
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
-
-const readAsync = promisify(fs.readFile)
-const writeAsync = promisify(fs.writeFile)
+const {WorkdirContext} = require('../../utils/context')
 
 
 
@@ -27,6 +24,9 @@ class NpmPublish {
   }
 
   async changePackageJsonVersion(workdirPath) {
+    const readAsync = promisify(fs.readFile)
+    const writeAsync = promisify(fs.writeFile)
+
     const newVersion = this.#workdir.__workdir_context__.get(WorkdirContext.TAG_FIELD_NAME)
     const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
     const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
@@ -58,12 +58,11 @@ class NpmPublish {
     }
 
     return new Promise((res, rej) => {
-      exec(command, (err, stdout, stderr) => {
+      childProcess.exec(command, (err, stdout, stderr) => {
         if (err) {
           rej(err);
           return;
         }
-        console.log(stdout)
         res(stdout);
       })
     })
