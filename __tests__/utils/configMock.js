@@ -1,5 +1,4 @@
-const {Config} = require("../../src/config");
-
+const { Config } = require('../../src/config')
 
 class ConfigMock {
     sandbox
@@ -18,10 +17,8 @@ class ConfigMock {
 
         this.sandbox.stub(Config.prototype, 'get').callsFake((property) => {
             return config[property]
-
         })
     }
 }
-
 
 exports.ConfigMock = ConfigMock

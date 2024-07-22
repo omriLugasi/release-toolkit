@@ -1,9 +1,8 @@
-
-const childProcess = require('node:child_process');
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
-const {NpmPublish} = require("./index");
+const childProcess = require('node:child_process')
+const fs = require('fs')
+const path = require('path')
+const { promisify } = require('util')
+const { NpmPublish } = require('./index')
 
 /**
  * @description
@@ -15,45 +14,50 @@ const {NpmPublish} = require("./index");
  * }
  */
 class NpmMirror {
-  #workdir
+    #workdir
 
-  constructor(workdir) {
-    this.#workdir = workdir
-  }
-
-  async changePackageJsonName(workdirPath) {
-    const readAsync = promisify(fs.readFile)
-    const writeAsync = promisify(fs.writeFile)
-    const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
-    const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
-    const newPackageJson = JSON.parse(packageJson)
-    newPackageJson.name = this.#workdir.packageName
-    await writeAsync(workdirPackageJsonPath, JSON.stringify(newPackageJson, null, 4))
-  }
-
-
-  async runPre(workdirPath) {
-    if (!this.#workdir.pre) {
-      return
+    constructor(workdir) {
+        this.#workdir = workdir
     }
-    return new Promise((res, rej) => {
-      childProcess.exec(`cd ${workdirPath} && ${this.#workdir.pre}`, (err, stdout, stderr) => {
-        if (err) {
-          rej(err);
-          return;
-        }
-        res(stdout);
-      })
-    })
-  }
 
-  async runMirroring() {
-      const workdirPath = path.join(process.cwd(), this.#workdir.folderPath)
-      await this.runPre(workdirPath)
-      await this.changePackageJsonName(workdirPath)
-      const npmInstance = new NpmPublish(this.#workdir)
-      await npmInstance.publish()
-  }
+    async changePackageJsonName(workdirPath) {
+        const readAsync = promisify(fs.readFile)
+        const writeAsync = promisify(fs.writeFile)
+        const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
+        const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
+        const newPackageJson = JSON.parse(packageJson)
+        newPackageJson.name = this.#workdir.packageName
+        await writeAsync(
+            workdirPackageJsonPath,
+            JSON.stringify(newPackageJson, null, 4)
+        )
+    }
+
+    async runPre(workdirPath) {
+        if (!this.#workdir.pre) {
+            return
+        }
+        return new Promise((res, rej) => {
+            childProcess.exec(
+                `cd ${workdirPath} && ${this.#workdir.pre}`,
+                (err, stdout, stderr) => {
+                    if (err) {
+                        rej(err)
+                        return
+                    }
+                    res(stdout)
+                }
+            )
+        })
+    }
+
+    async runMirroring() {
+        const workdirPath = path.join(process.cwd(), this.#workdir.folderPath)
+        await this.runPre(workdirPath)
+        await this.changePackageJsonName(workdirPath)
+        const npmInstance = new NpmPublish(this.#workdir)
+        await npmInstance.publish()
+    }
 }
 
 exports.NpmMirror = NpmMirror
