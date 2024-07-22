@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+node ../../src/commit-lint-index.js $1
