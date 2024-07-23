@@ -17,21 +17,21 @@ class Github {
 
     #repo
     #owner
-    #workdir
+    #workspace
     #axiosInstance
 
-    constructor(workdir) {
+    constructor(workspace) {
         const { repo, owner } = configService.get('repository')
 
         this.#repo = repo
         this.#owner = owner
-        this.#workdir = workdir
+        this.#workspace = workspace
 
         this.#axiosInstance = axios.create({
             baseURL: 'https://api.github.com',
             headers: {
                 'X-GitHub-Api-Version': '2022-11-28',
-                Authorization: `Bearer ${process.env.NPM_TOKEN}`,
+                Authorization: `Bearer ${process.env.GH_TOKEN}`,
             },
         })
         axiosRetry(this.#axiosInstance, { retries: 5 })
@@ -46,16 +46,16 @@ class Github {
     }
 
     #extractCommitId(releaseBody) {
-        const arr = releaseBody.split('<!--metadata:workdir-id:start ')
+        const arr = releaseBody.split('<!--metadata:workspace-id:start ')
         if (arr.length !== 2) {
             return null
         }
-        return arr[1].split(' metadata:workdir-id:end-->')[0]
+        return arr[1].split(' metadata:workspace-id:end-->')[0]
     }
 
     /**
      * @description
-     * Find the last release that related to the workdir
+     * Find the last release that related to the workspace
      */
     async #getLastRelease({ page } = { page: 1 }) {
         const response = await this.#axiosInstance.get(
@@ -67,7 +67,7 @@ class Github {
 
         for (const release of response.data) {
             const id = this.#extractCommitId(release.body)
-            if (id === this.#workdir.id) {
+            if (id === this.#workspace.id) {
                 return [release]
             }
         }
@@ -77,26 +77,26 @@ class Github {
 
     async #findRelatedCommit() {
         const response = await this.#axiosInstance.get(
-            `/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`
+            `/repos/${this.#owner}/${this.#repo}/commits/${this.#workspace.branch}`
         )
 
-        const isRelatedToWorkdir = (commit) => {
+        const isRelatedToworkspace = (commit) => {
             for (const file of commit.files) {
-                if (file.filename.startsWith(this.#workdir.folderPath)) {
+                if (file.filename.startsWith(this.#workspace.folderPath)) {
                     return true
                 }
             }
             return false
         }
 
-        if (isRelatedToWorkdir(response.data)) {
+        if (isRelatedToworkspace(response.data)) {
             return response.data.commit.committer.date
         }
 
         const reviewNextCommit = async (url) => {
             const { data: commit } = await this.#axiosInstance.get(url)
 
-            if (isRelatedToWorkdir(commit)) {
+            if (isRelatedToworkspace(commit)) {
                 return commit.commit.committer.date
             }
 
@@ -119,7 +119,7 @@ class Github {
         }
 
         throw new Error(
-            `Cannot find any commit that related to workdir=[${this.#workdir.folderPath}]`
+            `Cannot find any commit that related to workspace=[${this.#workspace.folderPath}]`
         )
     }
 
@@ -132,7 +132,7 @@ class Github {
 
     async #getCommitsByDate(since) {
         const response = await this.#axiosInstance.get(
-            `/repos/${this.#owner}/${this.#repo}/commits/${this.#workdir.branch}`
+            `/repos/${this.#owner}/${this.#repo}/commits/${this.#workspace.branch}`
         )
         let commits = []
         if (this.#isCommitDateValid(response.data.commit, since)) {
@@ -160,10 +160,10 @@ class Github {
             }
         }
 
-        // filter all commits that not related to the files of the workdir.
+        // filter all commits that not related to the files of the workspace.
         commits = commits.filter((commit) => {
             for (const file of commit.files) {
-                if (file.filename.startsWith(this.#workdir.folderPath)) {
+                if (file.filename.startsWith(this.#workspace.folderPath)) {
                     return true
                 }
             }
@@ -196,7 +196,7 @@ class Github {
                 sha: createdTagResponse.data.sha,
             }
         )
-        this.#workdir.__workdir_logger__.log({
+        this.#workspace.__workspace_logger__.log({
             plugin: GITHUB_PLUGIN_NAME,
             description: `Published a new tag "${newTag}"`,
             comment: `https://github.com/${this.#owner}/${this.#repo}/tree/${newTag}`,
@@ -219,21 +219,21 @@ class Github {
         }
 
         message += `\n\n\n<!--metadata:last-commit:start ${lastCommit.metadata.date} metadata:last-commit:end-->`
-        message += `\n\n\n<!--metadata:workdir-id:start ${this.#workdir.id} metadata:workdir-id:end-->`
+        message += `\n\n\n<!--metadata:workspace-id:start ${this.#workspace.id} metadata:workspace-id:end-->`
         return message
     }
 
     async #createRelease(modifiedTag, newTag, commits, lastCommit) {
         const releaseName = modifyStringByDotNotation(
             { release: newTag },
-            this.#workdir.releasePattern
+            this.#workspace.releasePattern
         )
 
         const response = await this.#axiosInstance.post(
             `/repos/${this.#owner}/${this.#repo}/releases`,
             {
                 tag_name: modifiedTag,
-                target_commitish: this.#workdir.branch,
+                target_commitish: this.#workspace.branch,
                 name: releaseName,
                 body: await this.#createChangelog(
                     modifiedTag,
@@ -246,7 +246,7 @@ class Github {
             }
         )
 
-        this.#workdir.__workdir_logger__.log({
+        this.#workspace.__workspace_logger__.log({
             plugin: GITHUB_PLUGIN_NAME,
             description: `Published a new release "${releaseName}"`,
             comment: response.data.html_url,
@@ -267,7 +267,7 @@ class Github {
 
         const modifiedTag = modifyStringByDotNotation(
             { tag: newTag },
-            this.#workdir.tagPattern
+            this.#workspace.tagPattern
         )
 
         await this.#createTag(modifiedTag, lastCommit.metadata.hash)
@@ -291,7 +291,7 @@ class Github {
     /**
      * @description
      * This function should work with github api to extract the commit messages from the last release.
-     * if release not exists for this workdir we will to find the last commit by the files changes, so we will iterate on the commits.
+     * if release not exists for this workspace we will to find the last commit by the files changes, so we will iterate on the commits.
      */
     async getDetails() {
         const [release] = await this.#getLastRelease()

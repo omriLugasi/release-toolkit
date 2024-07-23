@@ -6,7 +6,7 @@ const { GithubMock } = require('./utils/github')
 const { ConfigMock } = require('./utils/configMock')
 const assert = require('chai').assert
 
-const basicWorkdirObject = {
+const basicworkspaceObject = {
     folderPath: 'src/mock',
     branch: 'master',
 }
@@ -30,7 +30,7 @@ const basicConfiguration = {
         repo: 'mock_repo_name',
         owner: 'mock_owner_name',
     },
-    workdirs: [],
+    workspaces: [],
     commitPatterns: [
         {
             pattern: '^refactor\\(\\):',
@@ -61,6 +61,9 @@ describe('Main', () => {
         let instance
 
         before(async () => {
+            sandbox.stub(fs, 'readFile').callsFake((path, encode, callback) => {
+                callback(new Error('this is a custom error'))
+            })
             consoleStub = sandbox.stub(console, 'error').callsFake(() => {})
             instance = new EntryPoint()
         })
@@ -69,7 +72,7 @@ describe('Main', () => {
             sandbox.restore()
         })
 
-        it('should not failed when workdirs not supplied.', async () => {
+        it('should not failed when workspaces not supplied.', async () => {
             try {
                 await instance.init()
             } catch (e) {}
@@ -92,7 +95,7 @@ describe('Main', () => {
         })
     })
 
-    context('No workdirs property provided', () => {
+    context('No workspaces property provided', () => {
         const sandbox = sinon.createSandbox()
         let consoleStub
         let instance
@@ -108,7 +111,7 @@ describe('Main', () => {
             sandbox.restore()
         })
 
-        it('should not failed when workdirs not supplied.', async () => {
+        it('should not failed when workspaces not supplied.', async () => {
             try {
                 await instance.init()
             } catch (e) {
@@ -119,7 +122,7 @@ describe('Main', () => {
         it('should console the right error message', () => {
             assert.isTrue(
                 consoleStub.calledWith(
-                    'No workdirs found, please add "workdirs" property in your release toolkit file.'
+                    'No workspaces found, please add "workspaces" property in your release toolkit file.'
                 )
             )
         })
@@ -128,8 +131,8 @@ describe('Main', () => {
     describe('Github plugin', () => {
         context('When Github Plugin provided with simple scenario', () => {
             const sandbox = sinon.createSandbox()
-            const workdir = {
-                ...basicWorkdirObject,
+            const workspace = {
+                ...basicworkspaceObject,
                 id: 'github_1',
                 plugins: [basicGithubPlugin],
             }
@@ -151,12 +154,12 @@ describe('Main', () => {
                 const configMock = new ConfigMock(sandbox)
                 configMock.setConfiguration({
                     ...basicConfiguration,
-                    workdirs: [workdir],
+                    workspaces: [workspace],
                 })
 
                 githubMock.setFlow({
                     lastReleaseDate: nowDate.toISOString(),
-                    workdir,
+                    workspace,
                     commitMessages,
                     newReleaseDate: releaseDate.toISOString(),
                 })
@@ -184,12 +187,12 @@ describe('Main', () => {
                 })
             })
 
-            it('should create a new release with the relevant metadata (workdir id)', () => {
+            it('should create a new release with the relevant metadata (workspace id)', () => {
                 assert.strictEqual(
                     githubMock
                         .getCreatedRelease()
                         .body.includes(
-                            `<!--metadata:workdir-id:start ${workdir.id} metadata:workdir-id:end-->`
+                            `<!--metadata:workspace-id:start ${workspace.id} metadata:workspace-id:end-->`
                         ),
                     true
                 )
@@ -218,8 +221,8 @@ describe('Main', () => {
             'When Github Plugin provided with a new repository scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_2',
                     plugins: [basicGithubPlugin],
                 }
@@ -241,11 +244,11 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -271,12 +274,12 @@ describe('Main', () => {
                     )
                 })
 
-                it('should create a new release with the relevant metadata (workdir id)', () => {
+                it('should create a new release with the relevant metadata (workspace id)', () => {
                     assert.strictEqual(
                         githubMock
                             .getCreatedRelease()
                             .body.includes(
-                                `<!--metadata:workdir-id:start ${workdir.id} metadata:workdir-id:end-->`
+                                `<!--metadata:workspace-id:start ${workspace.id} metadata:workspace-id:end-->`
                             ),
                         true
                     )
@@ -306,8 +309,8 @@ describe('Main', () => {
             'When Github Plugin provided to semantic release repository scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_5',
                     plugins: [basicGithubPlugin],
                 }
@@ -330,18 +333,18 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
                     githubMock.setFlow({
                         releaseBody:
                             'this is the last release that not from release toolkit',
-                        workdir: { id: 'id that not exists' },
+                        workspace: { id: 'id that not exists' },
                         commitMessages: [],
                         newReleaseDate: releaseDate.toISOString(),
                     })
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -367,12 +370,12 @@ describe('Main', () => {
                     )
                 })
 
-                it('should create a new release with the relevant metadata (workdir id)', () => {
+                it('should create a new release with the relevant metadata (workspace id)', () => {
                     assert.strictEqual(
                         githubMock
                             .getCreatedRelease()
                             .body.includes(
-                                `<!--metadata:workdir-id:start ${workdir.id} metadata:workdir-id:end-->`
+                                `<!--metadata:workspace-id:start ${workspace.id} metadata:workspace-id:end-->`
                             ),
                         true
                     )
@@ -402,8 +405,8 @@ describe('Main', () => {
             'When Github Plugin provided with wrong commit pattern should not trigger the release publish scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_6',
                     plugins: [basicGithubPlugin],
                 }
@@ -425,12 +428,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -453,8 +456,8 @@ describe('Main', () => {
             'When Github and NPM Plugins provided with simple scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm_10',
                     plugins: [basicGithubPlugin, basicNpmPlugin],
                 }
@@ -479,12 +482,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -557,8 +560,8 @@ describe('Main', () => {
             'When Github and NPM Plugins provided with no publish needed scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm_10',
                     plugins: [basicGithubPlugin, basicNpmPlugin],
                 }
@@ -583,12 +586,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -643,8 +646,8 @@ describe('Main', () => {
             'When Github and NPM Plugins provided with NPM publish failed scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm_12',
                     plugins: [basicGithubPlugin, basicNpmPlugin],
                 }
@@ -669,12 +672,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -736,8 +739,8 @@ describe('Main', () => {
             'When Github and NPM (dry run) Plugins provided with simple scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm_10',
                     plugins: [
                         basicGithubPlugin,
@@ -765,12 +768,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -844,8 +847,8 @@ describe('Main', () => {
             'When Github and NPM mirroring Plugins provided with simple scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm:mirroring_10',
                     plugins: [basicGithubPlugin, basicNpmMirroringPlugin],
                 }
@@ -870,12 +873,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -966,8 +969,8 @@ describe('Main', () => {
             'When Github and NPM mirroring Plugins provided with no publish needed scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm:mirroring_11',
                     plugins: [basicGithubPlugin, basicNpmMirroringPlugin],
                 }
@@ -992,12 +995,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -1052,8 +1055,8 @@ describe('Main', () => {
             'When Github and NPM mirroring Plugins provided with pre script failed scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm:mirroring_12',
                     plugins: [basicGithubPlugin, basicNpmMirroringPlugin],
                 }
@@ -1076,12 +1079,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })
@@ -1127,8 +1130,8 @@ describe('Main', () => {
             'When Github and NPM (dry run) mirroring Plugins provided with simple scenario',
             () => {
                 const sandbox = sinon.createSandbox()
-                const workdir = {
-                    ...basicWorkdirObject,
+                const workspace = {
+                    ...basicworkspaceObject,
                     id: 'github_npm:mirroring_10',
                     plugins: [
                         basicGithubPlugin,
@@ -1154,12 +1157,12 @@ describe('Main', () => {
                     const configMock = new ConfigMock(sandbox)
                     configMock.setConfiguration({
                         ...basicConfiguration,
-                        workdirs: [workdir],
+                        workspaces: [workspace],
                     })
 
                     githubMock.setFlow({
                         lastReleaseDate: nowDate.toISOString(),
-                        workdir,
+                        workspace,
                         commitMessages,
                         newReleaseDate: releaseDate.toISOString(),
                     })

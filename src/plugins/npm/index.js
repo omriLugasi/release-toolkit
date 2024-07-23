@@ -2,37 +2,40 @@ const childProcess = require('node:child_process')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const { WorkdirContext } = require('../../utils/context')
+const { WorkSpaceContext } = require('../../utils/context')
 
 /**
  * @description
- * workdir should contain only the following structure
- * type workdir = {
+ * workspace should contain only the following structure
+ * type workspace = {
  *   dryRun?: boolean
  *   tag?: boolean
  *   name: string
  * }
  */
 class NpmPublish {
-    #workdir
+    #workspace
 
-    constructor(workdir) {
-        this.#workdir = workdir
+    constructor(workspace) {
+        this.#workspace = workspace
     }
 
-    async changePackageJsonVersion(workdirPath) {
+    async changePackageJsonVersion(workspacePath) {
         const readAsync = promisify(fs.readFile)
         const writeAsync = promisify(fs.writeFile)
 
-        const newVersion = this.#workdir.__workdir_context__.get(
-            WorkdirContext.TAG_FIELD_NAME
+        const newVersion = this.#workspace.__workspace_context__.get(
+            WorkSpaceContext.TAG_FIELD_NAME
         )
-        const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
-        const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
+        const workspacePackageJsonPath = path.join(
+            workspacePath,
+            'package.json'
+        )
+        const packageJson = await readAsync(workspacePackageJsonPath, 'utf8')
         const newPackageJson = JSON.parse(packageJson)
         newPackageJson.version = newVersion
         await writeAsync(
-            workdirPackageJsonPath,
+            workspacePackageJsonPath,
             JSON.stringify(newPackageJson, null, 4)
         )
     }
@@ -42,18 +45,21 @@ class NpmPublish {
      * Publish the package with the new tag.
      */
     async publish() {
-        const workdirPath = path.join(process.cwd(), this.#workdir.folderPath)
+        const workspacePath = path.join(
+            process.cwd(),
+            this.#workspace.folderPath
+        )
 
-        await this.changePackageJsonVersion(workdirPath)
+        await this.changePackageJsonVersion(workspacePath)
 
-        let command = `cd ${workdirPath} && npm publish`
+        let command = `cd ${workspacePath} && npm publish`
 
-        if (this.#workdir.dryRun) {
+        if (this.#workspace.dryRun) {
             command += ' --dry-run'
         }
 
         // TODO: support tag release.
-        if (this.#workdir.tag === true) {
+        if (this.#workspace.tag === true) {
             command += ' --tag'
             throw new Error('currently not supported!')
         }

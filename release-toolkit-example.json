@@ -1,18 +1,18 @@
 {
   "repository": {
-    "repo": "release-toolkit",
-    "owner": "omriLugasi"
+    "repo": "<REPO_NAME>",
+    "owner": "<OWNER_NAME>"
   },
-  "workdirs": [
+  "workspaces": [
     {
-      "branch": "main",
-      "folderPath": "src/a",
+      "branch": "<MAIN_BRANCH>",
+      "folderPath": "<FOLDER_PATH_HERE>",
       "id": "main",
       "plugins": [
         {
           "name": "github",
-          "tagPattern": "{{tag}}-main",
-          "releasePattern": "Main - {{release}}"
+          "tagPattern": "{{tag}}",
+          "releasePattern": "{{release}}"
         },
         {
           "name": "npm",

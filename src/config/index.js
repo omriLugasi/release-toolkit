@@ -2,16 +2,15 @@ const path = require('path')
 const fs = require('fs')
 const { promisify } = require('util')
 
-const readFileAsync = promisify(fs.readFile)
-
 class Config {
-    static WORKDIRS_KEY = 'workdirs'
+    static WORKSPACES_KEY = 'workspaces'
     static COMMIT_PATTERNS_KEY = 'commitPatterns'
     static REPOSITORY_KEY = 'repository'
 
     async init() {
         const configFilePath = path.join(process.cwd(), 'release-toolkit.json')
         try {
+            const readFileAsync = promisify(fs.readFile)
             const config = await readFileAsync(configFilePath)
             this.configuration = JSON.parse(config)
         } catch (e) {

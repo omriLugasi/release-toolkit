@@ -12,7 +12,7 @@ class LogManager {
     }
 
     print() {
-        console.log(`Workdir flow summary for "${this.folderPath}"`)
+        console.log(`workspace flow summary for "${this.folderPath}"`)
         console.table(
             this.table.map((row) => {
                 const newObj = {}

@@ -3,7 +3,7 @@
     "repo": "release-toolkit",
     "owner": "omriLugasi"
   },
-  "workdirs": [
+  "workspaces": [
     {
       "branch": "main",
       "folderPath": "src",

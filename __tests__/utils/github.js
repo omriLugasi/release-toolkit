@@ -36,7 +36,7 @@ class GithubMock {
         lastReleaseDate,
         releaseBody,
         newReleaseDate,
-        workdir,
+        workspace,
         commitMessages,
     } = {}) {
         // if lastReleaseDate and releaseBody not supplied do not sign release to the flow
@@ -44,7 +44,7 @@ class GithubMock {
             const release = this.generateRelease(
                 lastReleaseDate,
                 releaseBody,
-                workdir.id
+                workspace.id
             )
             this.onNextReleaseRequested(release)
         }
@@ -57,7 +57,7 @@ class GithubMock {
                 ...cmt,
                 files: cmt.files.map((file) => ({
                     ...file,
-                    filename: `${workdir.folderPath}/a.js`,
+                    filename: `${workspace.folderPath}/a.js`,
                 })),
                 commit: {
                     ...cmt.commit,
@@ -168,7 +168,7 @@ class GithubMock {
         }
     }
 
-    generateRelease(releaseDate, releaseBody, workdirId) {
+    generateRelease(releaseDate, releaseBody, workspaceId) {
         return {
             url: 'https://api.github.com/repos/onwerName/repoName/releases/162853025',
             assets_url:
@@ -225,7 +225,7 @@ class GithubMock {
                 `
                 <!--metadata:last-commit:start ${releaseDate} metadata:last-commit:end-->
                 
-                <!--metadata:workdir-id:start ${workdirId} metadata:workdir-id:end-->            
+                <!--metadata:workspace-id:start ${workspaceId} metadata:workspace-id:end-->            
             `,
         }
     }

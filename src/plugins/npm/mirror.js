@@ -6,40 +6,43 @@ const { NpmPublish } = require('./index')
 
 /**
  * @description
- * workdir should contain only the following structure
- * type workdir = {
+ * workspace should contain only the following structure
+ * type workspace = {
  *   pre?: string
  *   packageName: string
  *   name: string
  * }
  */
 class NpmMirror {
-    #workdir
+    #workspace
 
-    constructor(workdir) {
-        this.#workdir = workdir
+    constructor(workspace) {
+        this.#workspace = workspace
     }
 
-    async changePackageJsonName(workdirPath) {
+    async changePackageJsonName(workspacePath) {
         const readAsync = promisify(fs.readFile)
         const writeAsync = promisify(fs.writeFile)
-        const workdirPackageJsonPath = path.join(workdirPath, 'package.json')
-        const packageJson = await readAsync(workdirPackageJsonPath, 'utf8')
+        const workspacePackageJsonPath = path.join(
+            workspacePath,
+            'package.json'
+        )
+        const packageJson = await readAsync(workspacePackageJsonPath, 'utf8')
         const newPackageJson = JSON.parse(packageJson)
-        newPackageJson.name = this.#workdir.packageName
+        newPackageJson.name = this.#workspace.packageName
         await writeAsync(
-            workdirPackageJsonPath,
+            workspacePackageJsonPath,
             JSON.stringify(newPackageJson, null, 4)
         )
     }
 
-    async runPre(workdirPath) {
-        if (!this.#workdir.pre) {
+    async runPre(workspacePath) {
+        if (!this.#workspace.pre) {
             return
         }
         return new Promise((res, rej) => {
             childProcess.exec(
-                `cd ${workdirPath} && ${this.#workdir.pre}`,
+                `cd ${workspacePath} && ${this.#workspace.pre}`,
                 (err, stdout, stderr) => {
                     if (err) {
                         rej(err)
@@ -52,10 +55,13 @@ class NpmMirror {
     }
 
     async runMirroring() {
-        const workdirPath = path.join(process.cwd(), this.#workdir.folderPath)
-        await this.runPre(workdirPath)
-        await this.changePackageJsonName(workdirPath)
-        const npmInstance = new NpmPublish(this.#workdir)
+        const workspacePath = path.join(
+            process.cwd(),
+            this.#workspace.folderPath
+        )
+        await this.runPre(workspacePath)
+        await this.changePackageJsonName(workspacePath)
+        const npmInstance = new NpmPublish(this.#workspace)
         await npmInstance.publish()
     }
 }
