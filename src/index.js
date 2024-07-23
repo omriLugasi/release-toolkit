@@ -13,31 +13,51 @@ const { WorkSpaceContext } = require('./utils/context')
 
 class EntryPoint {
     async runWithGithub(workspace) {
-        const github = new Github(workspace)
-        const { commits, tag } = await github.getDetails()
-        const { affectedCommits, newTag } = commitResolver(tag, commits)
-        if (!affectedCommits.length) {
+        try {
+            const github = new Github(workspace)
+            const { commits, tag } = await github.getDetails()
+            const { affectedCommits, newTag } = commitResolver(tag, commits)
+            if (!affectedCommits.length) {
+                workspace.__workspace_logger__.log({
+                    plugin: GITHUB_PLUGIN_NAME,
+                    description: 'No changes found. No action taken',
+                })
+                return
+            }
+
+            await github.release(newTag, affectedCommits)
+
+            /**
+             * @description
+             * Set the new tag value of the context for further usage.
+             */
+            workspace.__workspace_context__.set(
+                WorkSpaceContext.TAG_FIELD_NAME,
+                newTag
+            )
+            workspace.__workspace_context__.set(
+                WorkSpaceContext.GITHUB_STATUS_FIELD_NAME,
+                Github.STATUS_SUCCESS
+            )
+        } catch (e) {
+            let error = e.message
+            if (
+                e.response &&
+                e.response.data &&
+                typeof e.response.data.message === 'string'
+            ) {
+                error = `${e.message}, ${e.response.data.message}`
+            }
             workspace.__workspace_logger__.log({
                 plugin: GITHUB_PLUGIN_NAME,
-                description: 'No changes found. No action taken',
+                description: 'Github operation failed',
+                comment: `Error: ${error}`,
             })
-            return
+            workspace.__workspace_context__.set(
+                WorkSpaceContext.GITHUB_STATUS_FIELD_NAME,
+                Github.STATUS_FAILED
+            )
         }
-
-        await github.release(newTag, affectedCommits)
-
-        /**
-         * @description
-         * Set the new tag value of the context for further usage.
-         */
-        workspace.__workspace_context__.set(
-            WorkSpaceContext.TAG_FIELD_NAME,
-            newTag
-        )
-        workspace.__workspace_context__.set(
-            WorkSpaceContext.GITHUB_STATUS_FIELD_NAME,
-            Github.STATUS_SUCCESS
-        )
     }
 
     async runWithNpmPublish(workspace) {
