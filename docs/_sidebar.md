@@ -1,2 +1,6 @@
 * [Home](/)
-* [Guide](guide.md)
+* [Configuration File](CONFIGURATION_FILE.md)
+* [Plugins](.)
+* [Commit lint](.)
+* [Github Action](.)
+* [Licence](/?id=license)
