@@ -18,8 +18,8 @@
          name: 'Yarn install'
        - run: yarn test
          name: 'Tests'
-#       - run: echo //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}} > .npmrc
-#         name: 'Set .npm file file'
+       - run: echo //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}} > .npmrc
+         name: 'Set .npm file file'
        - run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit
        - run: |
            rm .npmrc
