@@ -12,7 +12,6 @@ class LogManager {
     }
 
     print() {
-        console.log(`workspace flow summary for "${this.folderPath}"`)
         console.log({
             workspace: this.folderPath,
             summary: this.table,
