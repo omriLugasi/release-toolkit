@@ -13,19 +13,10 @@ class LogManager {
 
     print() {
         console.log(`workspace flow summary for "${this.folderPath}"`)
-        console.table(
-            this.table.map((row) => {
-                const newObj = {}
-                for (const rowProperty in row) {
-                    for (const item of this.keys) {
-                        if (item.name === rowProperty) {
-                            newObj[item.headerName] = row[rowProperty]
-                        }
-                    }
-                }
-                return newObj
-            })
-        )
+        console.log({
+            workspace: this.folderPath,
+            summary: this.table,
+        })
     }
 }
 
