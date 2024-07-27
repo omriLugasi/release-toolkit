@@ -1,11 +1,10 @@
 
 
 # Release Toolkit Documentation
-> ***The best tool to handle release processes for mono repo and single repo projects.***
+> ***The best tool to handle release processes for mono repo and multi repo projects.***
 
 ## Overview
-In order to provide not only the release process also the day to day work with this tool we provide you the option to set commit lint restriction as part
-of your repository with the same configuration of the release toolkit.
+To support both the release process and day-to-day development, we offer the option to enforce commit linting restrictions using the same configuration file as the Release Toolkit.
 
 ## Usage
 In your `.husky/commit-msg` you can add the following:
@@ -14,8 +13,9 @@ In your `.husky/commit-msg` you can add the following:
 
 node $PWD/node_modules/.bin/commit-lint/index.js $1
 ```
-The lint restriction will be the same rule that you currently have for your release toolkit, so basically the `commitPattern` section in the release-toolkit configuration file
-also define the rules to the commit linter.
+
+
+The linting rules for commit messages will align with the release toolkit's configuration, ensuring consistency across your development and release processes. Specifically, the commitPatterns section in the release-toolkit.json file not only guides version upgrades during releases but also defines the rules for commit linting. This means that the same patterns used to trigger version changes will also enforce commit message standards, streamlining your workflow and maintaining uniformity in commit practices.
 
 ```json
 {
@@ -44,5 +44,4 @@ also define the rules to the commit linter.
 
 ```
 
-if the commit not return `true` on all those pattern we will failed the commit and your developer wont be able to commit the change unless they will change the commit message
-to the once of those patterns.
+If a commit message does not match any of the defined patterns in the commitPatterns section, the commit will be rejected. The developer will need to modify the commit message to conform to one of the specified patterns in order to proceed.

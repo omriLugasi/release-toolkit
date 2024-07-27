@@ -1,6 +1,6 @@
 
 # Release Toolkit Documentation
-> ***The best tool to handle release processes for mono repo and single repo projects.***
+> ***The best tool to handle release processes for mono repo and multi repo projects.***
 
 ## Table Of Content
 - [Github](#github-plugin)
@@ -11,7 +11,7 @@
 All the following plugins configurations should be under the `workspace.plugins` array.
 
 ### Github Plugin
-Github plugin integrate to your github account and responsible to create github tag and github release (including changelog) according to your configuration.
+The GitHub plugin integrates with your GitHub account and is responsible for creating GitHub tags and releases (including changelogs) based on your configuration.
 
 ```json
 {
@@ -24,7 +24,7 @@ Github plugin integrate to your github account and responsible to create github 
 
 
 ### Npm Plugin
-Npm plugin integrate to your npm account and responsible to publish versions according to the response of the `git`(github) plugin
+The npm plugin integrates with your npm account and is responsible for publishing versions based on the output from the GitHub plugin.
 
 ```json
 {
@@ -39,10 +39,8 @@ Npm plugin integrate to your npm account and responsible to publish versions acc
 
 
 ### Npm Mirroring Plugin
-Npm mirroring plugin integrate to your npm account and responsible to publish the same version of your package on `"packageName"` package, 
-this is useful when you have different types of the same app and the build process is different.
-
-> The `pre` script should help you build the new package for the secondary types.
+The npm mirroring plugin integrates with your npm account and is responsible for publishing the same version of your package under the "packageName" specified.
+This is useful when you have different variations of the same app with different build processes.
 
 ```json
 {

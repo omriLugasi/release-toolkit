@@ -1,6 +1,6 @@
 
 # Release Toolkit Documentation
-> ***The best tool to handle release processes for mono repo and single repo projects.***
+> ***The best tool to handle release processes for mono repo and multi repo projects.***
 
 
 ## Example for github action with release toolkit

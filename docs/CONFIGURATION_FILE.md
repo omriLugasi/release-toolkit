@@ -1,5 +1,5 @@
 # Release Toolkit Documentation
-> ***The best tool to handle release processes for mono repo and single repo projects.***
+> ***The best tool to handle release processes for mono repo and multi repo projects.***
 
 ## Configuration
 The Release Toolkit requires a configuration file named `release-toolkit.json` in the root folder of your project.
@@ -63,14 +63,17 @@ You can find good example in the following [link](https://github.com/omriLugasi/
 
 ```
 
-## Repository
-The repository part hold your repository details like `owner` and `repo`.
+## Configuration Details
 
-For example if my repository is `https://github.com/omriLugasi/release-toolkit`
-Then my owner name is `omriLugasi` and the repo is `release-toolkit`.
+### Repository
+The repository section holds your repository details such as owner and repo.
 
-## Workspaces
-Workspace Section hold your repo workspaces each workspace should contains the following (all properties are mandatory):
+For example, if your repository is https://github.com/omriLugasi/release-toolkit, then the owner name is `omriLugasi` and the repo name is `release-toolkit`.
+
+### Workspaces
+The `workspaces` section contains an array of workspace configurations for your repository. Each workspace configuration must include the following properties:
+
+
 ```json
 
   {
@@ -80,14 +83,14 @@ Workspace Section hold your repo workspaces each workspace should contains the f
       "plugins": []
   }
 ```
- - `branch` - Each push to this branch name will invoke the workspace release process.
- - `folderPath` - The folder path of the workspace in the repo (example `src/workspaces/my-awesome-project-1`)
- - `id` - This is a unique identifier that should help us define the previous version, do not change it once it's set.
- - `plugins` - The plugins that should run on the release process, example are github, npm, npm:mirroring and more ...
+ - `branch`: The branch name that triggers the workspace release process upon a push.
+ - `folderPath`: The folder path of the workspace in the repo (e.g., src/workspaces/my-awesome-project-1).
+ - `id`: A unique identifier for the workspace, which helps define the previous version. Do not change it once it's set.
+ - `plugins`: An array of plugins to run during the release process (e.g., GitHub, npm, npm).
 
-## CommitPatterns
-Release toolkit know how to upgrade your package and github version according to the commits that made, this is where `commitPattern` comes handy,
-the idea is to set your convention for commit messages and which type of upgrade each pattern should update.
+### CommitPatterns
+The commitPatterns section allows you to specify how commit messages should influence the version upgrade process.
+This is based on commit message patterns and their corresponding upgrade actions.
 
 > An example for commit pattern config
 
@@ -117,10 +120,10 @@ the idea is to set your convention for commit messages and which type of upgrade
 }
 ```
 
-For each commit pattern you need to provide the following:
-- `pattern` - Regex pattern to apply on the messages.
-- `upgrade` - Which version should I upgrade too, `major`.`minor`.`build` (`ignore` means, do nothing, no release or tag and no publish).
-- `title` - When release toolkit create change log on your release, all the commits that returns true on this pattern will under the title that you provide.
+For each commit pattern, you need to provide the following:
+- `pattern` - A regex pattern to apply to commit messages.
+- `upgrade` - The type of version upgrade to apply, (`major`.`minor`.`build`) `ignore` means no action is taken (no release, tag, or publish).
+- `title` - The title under which matching commits will be grouped in the changelog created by the Release Toolkit.
 
 
 
