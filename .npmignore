@@ -1,0 +1,9 @@
+.husky/
+.github/
+__tests__/
+docs/
+.gitignore
+.prettierrc.json
+README.md
+release-toolkit.json
+release-toolkit-example.json
