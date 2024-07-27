@@ -16,6 +16,4 @@
            registry-url: https://registry.npmjs.org/
        - run: yarn install
        - run: yarn test
-         env:
-           GH_TOKEN: ${{secrets.GH_TOKEN}}
-       - run: npx release-toolkit
+       - run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit
