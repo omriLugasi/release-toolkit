@@ -5,8 +5,8 @@
   },
   "workspaces": [
     {
-      "branch": "main",
-      "folderPath": "src",
+      "branch": "master",
+      "folderPath": "",
       "id": "main",
       "plugins": [
         {
