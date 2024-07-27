@@ -288,6 +288,14 @@ class Github {
 
     /**
      * @description
+     * Find the tag version by the provided pattern.
+     */
+    #getTagVersion(tagName) {
+        return tagName.match(/\d*[.]?\d[.]?\d*/)[0]
+    }
+
+    /**
+     * @description
      * Provide the tag version and last commit date (-3 milliseconds) in the repository.
      * The -3 will provide us the option to point on this commit as a commit that trigger the flow.
      */
@@ -318,7 +326,7 @@ class Github {
             if (since === null) {
                 since = release.created_at
             }
-            tagVersion = release.tag_name.split('-')[0]
+            tagVersion = this.#getTagVersion(release.tag_name)
         }
 
         const commits = await this.#getCommitsByDate(since)

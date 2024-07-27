@@ -37,6 +37,11 @@
       "title": "Chores"
     },
     {
+      "pattern": "^fix\\(\\):",
+      "upgrade": "build",
+      "title": "Bugs"
+    },
+    {
       "pattern": "^docs\\(\\):",
       "upgrade": "ignore",
       "title": "Docs"
