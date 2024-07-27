@@ -5,6 +5,9 @@
     "repository": "git@github.com:omriLugasi/release-toolkit.git",
     "author": "omri luggasi",
     "license": "MIT",
+    "bin": {
+        "release": "src/index.js"
+    },
     "scripts": {
         "test": "NODE_ENV=test mocha \"__tests__/**/*.test.js\"",
         "prepare": "yarn husky install",
