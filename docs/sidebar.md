@@ -2,5 +2,5 @@
 * [Configuration File](CONFIGURATION_FILE.md)
 * [Plugins](PLUGINS_FILE.md)
 * [Commit lint](COMMIT_LINT.md)
-* [Github Action](.)
+* [Github Action](GITHUB_ACTION_FILE.md)
 * [Licence](/?id=license)
