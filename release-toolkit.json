@@ -15,8 +15,7 @@
           "releasePattern": "{{release}}"
         },
         {
-          "name": "npm",
-          "dryRun": true
+          "name": "npm"
         }
       ]
     }
@@ -25,7 +24,7 @@
     {
       "pattern": "^refactor\\(\\):",
       "upgrade": "major",
-      "title": "Refeactor!"
+      "title": "Refactor!"
     },
     {
       "pattern": "^feat\\(\\):",
