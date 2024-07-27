@@ -6,7 +6,7 @@
     "author": "omri luggasi",
     "license": "MIT",
     "bin": {
-        "release": "src/index.js"
+        "release": "./src/index.js"
     },
     "scripts": {
         "test": "NODE_ENV=test mocha \"__tests__/**/*.test.js\"",
