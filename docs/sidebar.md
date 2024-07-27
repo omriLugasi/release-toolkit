@@ -1,6 +1,6 @@
 * [Home](/)
 * [Configuration File](CONFIGURATION_FILE.md)
-* [Plugins](.)
-* [Commit lint](.)
+* [Plugins](PLUGINS_FILE.md)
+* [Commit lint](COMMIT_LINT.md)
 * [Github Action](.)
 * [Licence](/?id=license)
