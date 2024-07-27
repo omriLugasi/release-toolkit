@@ -119,7 +119,7 @@ the idea is to set your convention for commit messages and which type of upgrade
 
 For each commit pattern you need to provide the following:
 - `pattern` - Regex pattern to apply on the messages.
-- `upgrade` - Which version should I upgrade too, `major`.`minor`.`build`.
+- `upgrade` - Which version should I upgrade too, `major`.`minor`.`build` (`ignore` means, do nothing, no release or tag and no publish).
 - `title` - When release toolkit create change log on your release, all the commits that returns true on this pattern will under the title that you provide.
 
 

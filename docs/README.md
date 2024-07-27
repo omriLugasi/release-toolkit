@@ -26,7 +26,7 @@ GH_TOKEN=<YOUR_GH_TOKEN_HERE> npx release-toolkit
 Replace <YOUR_GH_TOKEN_HERE> with your GitHub token, which is required to authenticate and perform actions on your GitHub repository.
 
 ## Next Releases
-1. Insight dashboard that will help you understand you app and publish process better.
+1. Insight dashboard that will help you understand your app and publish process better.
 
 ## License
 The Release Toolkit is licensed under the `MIT` License. See the LICENSE file for more information.

@@ -33,14 +33,16 @@ Npm plugin integrate to your npm account and responsible to publish versions acc
 ```
 **Optional Properties**
 
-| Property Name | Property Type    | #Comments    |
-| :---:   | :---: | :---: |
-| dryRun | boolean   | default is `false`    |
+| Property Name | Property Type    |       Comments       |
+| :---:   | :---: |:--------------------:|
+| dryRun | boolean   |  default is `false`  |
 
 
 ### Npm Mirroring Plugin
-Npm mirroring plugin integrate to your npm account and responsible to publish the same version of other package as your package, 
-this is useful when you have different veriest of the same app that act like 2 different apps by environment variable.
+Npm mirroring plugin integrate to your npm account and responsible to publish the same version of your package on `"packageName"` package, 
+this is useful when you have different types of the same app and the build process is different.
+
+> The `pre` script should help you build the new package for the secondary types.
 
 ```json
 {
@@ -51,6 +53,6 @@ this is useful when you have different veriest of the same app that act like 2 d
 ```
 **Optional Properties**
 
-| Property Name | Property Type    | #Comments    |
-| :---:   | :---: | :---: |
-| dryRun | boolean   | default is `false`    |
+| Property Name | Property Type    |       Comments       |
+| :---:   | :---: |:--------------------:|
+| dryRun | boolean   |  default is `false`  |
