@@ -57,7 +57,11 @@ class GithubMock {
                 ...cmt,
                 files: cmt.files.map((file) => ({
                     ...file,
-                    filename: `${workspace.folderPath}/a.js`,
+                    // '.' means that we want 1 workspace on all the repo instead of releases per workspace.
+                    filename:
+                        workspace.folderPath !== '.'
+                            ? `${workspace.folderPath}/a.js`
+                            : 'a.js',
                 })),
                 commit: {
                     ...cmt.commit,

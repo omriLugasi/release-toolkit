@@ -80,23 +80,23 @@ class Github {
             `/repos/${this.#owner}/${this.#repo}/commits/${this.#workspace.branch}`
         )
 
-        const isRelatedToworkspace = (commit) => {
+        const isRelatedToWorkspace = (commit) => {
             for (const file of commit.files) {
-                if (file.filename.startsWith(this.#workspace.folderPath)) {
+                if (this.#isFileRelatedToWorkspace(file.filename)) {
                     return true
                 }
             }
             return false
         }
 
-        if (isRelatedToworkspace(response.data)) {
+        if (isRelatedToWorkspace(response.data)) {
             return response.data.commit.committer.date
         }
 
         const reviewNextCommit = async (url) => {
             const { data: commit } = await this.#axiosInstance.get(url)
 
-            if (isRelatedToworkspace(commit)) {
+            if (isRelatedToWorkspace(commit)) {
                 return commit.commit.committer.date
             }
 
@@ -128,6 +128,17 @@ class Github {
             new Date(commit.author.date).getTime() >
             new Date(since.trim()).getTime()
         )
+    }
+
+    /**
+     * @description
+     * if folder path equal to "." it's mean that all the repo should be effected from this workspace.
+     */
+    #isFileRelatedToWorkspace(filename) {
+        if (this.#workspace.folderPath === '.') {
+            return true
+        }
+        return filename.startsWith(this.#workspace.folderPath)
     }
 
     async #getCommitsByDate(since) {
@@ -163,7 +174,7 @@ class Github {
         // filter all commits that not related to the files of the workspace.
         commits = commits.filter((commit) => {
             for (const file of commit.files) {
-                if (file.filename.startsWith(this.#workspace.folderPath)) {
+                if (this.#isFileRelatedToWorkspace(file.filename)) {
                     return true
                 }
             }

@@ -449,8 +449,99 @@ describe('Main', () => {
                 })
             }
         )
-    })
 
+        context(
+            'When Github Plugin provided with mono repo for one project',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const workspace = {
+                    ...basicworkspaceObject,
+                    folderPath: '.',
+                    id: 'github_1',
+                    plugins: [basicGithubPlugin],
+                }
+                const commitMessages = [
+                    'chore(): an example for commit message',
+                    'feat(): an example for commit message',
+                ]
+                let githubMock
+                const nowDate = new Date()
+                const releaseDate = new Date(
+                    new Date(nowDate).setMinutes(nowDate.getMinutes() + 2)
+                )
+
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+                    githubMock = githubMock = new GithubMock(sandbox)
+                    const configMock = new ConfigMock(sandbox)
+                    configMock.setConfiguration({
+                        ...basicConfiguration,
+                        workspaces: [workspace],
+                    })
+
+                    githubMock.setFlow({
+                        lastReleaseDate: nowDate.toISOString(),
+                        workspace,
+                        commitMessages,
+                        newReleaseDate: releaseDate.toISOString(),
+                    })
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should create a new release according to the template', () => {
+                    assert.strictEqual(
+                        githubMock.getCreatedRelease().name,
+                        'Main - 0.1.0'
+                    )
+                })
+
+                it('should create a new release with the commits inside the message body', () => {
+                    const releaseBody = githubMock.getCreatedRelease().body
+                    commitMessages.forEach((commitMessage) => {
+                        assert.strictEqual(
+                            releaseBody.includes(commitMessage),
+                            true
+                        )
+                    })
+                })
+
+                it('should create a new release with the relevant metadata (workspace id)', () => {
+                    assert.strictEqual(
+                        githubMock
+                            .getCreatedRelease()
+                            .body.includes(
+                                `<!--metadata:workspace-id:start ${workspace.id} metadata:workspace-id:end-->`
+                            ),
+                        true
+                    )
+                })
+
+                it('should create a new release with the relevant metadata (last commit date)', () => {
+                    assert.strictEqual(
+                        githubMock
+                            .getCreatedRelease()
+                            .body.includes(
+                                `<!--metadata:last-commit:start ${releaseDate.toISOString()} metadata:last-commit:end-->`
+                            ),
+                        true
+                    )
+                })
+
+                it('should create a new release with the relevant tag (according to the template)', () => {
+                    assert.strictEqual(
+                        githubMock.getCreatedRelease().tag_name,
+                        `0.1.0-${basicGithubPlugin.tagPattern.replace('{{tag}}-', '')}`
+                    )
+                })
+            }
+        )
+    })
     describe('NPM plugin', () => {
         context(
             'When Github and NPM Plugins provided with simple scenario',

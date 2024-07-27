@@ -6,7 +6,7 @@
   "workspaces": [
     {
       "branch": "master",
-      "folderPath": "src",
+      "folderPath": ".",
       "id": "main",
       "plugins": [
         {
