@@ -12,6 +12,7 @@ const commitResolver = require('./commit-resolver')
 const { NpmPublish } = require('./plugins/npm')
 const { NpmMirror } = require('./plugins/npm/mirror')
 const { WorkSpaceContext } = require('./utils/context')
+const { Deployer } = require('./deployer')
 
 class EntryPoint {
     async runWithGithub(workspace) {
@@ -182,5 +183,11 @@ class EntryPoint {
 if (process.env.NODE_ENV === 'test') {
     module.exports = EntryPoint
 } else {
-    new EntryPoint().init()
+    switch (process.argv[2]) {
+        case 'set-config':
+            return new Deployer().init()
+        case 'release':
+        default:
+            new EntryPoint().init()
+    }
 }
