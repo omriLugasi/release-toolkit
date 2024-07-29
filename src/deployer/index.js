@@ -86,7 +86,7 @@ class Deployer {
 
         const targetPath = path.join(
             process.cwd(),
-            '.github/workflows/auto-build.yml'
+            '.github/workflows/release-toolkit-auto-build.yml'
         )
 
         // create the folders if not exists
