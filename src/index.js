@@ -188,9 +188,8 @@ if (process.env.NODE_ENV === 'test') {
             const { Deployer } = require('./deployer')
             return new Deployer().init()
         case 'commit-lint':
-            return console.log('apply commit lint for the user .....')
-        // const { Deployer } = require('./deployer')
-        // return new Deployer().init()
+            // need to test it ....
+            return require('./commit-lint')
         case 'release':
         default:
             new EntryPoint().init()
