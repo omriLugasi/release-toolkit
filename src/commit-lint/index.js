@@ -5,7 +5,7 @@ const { promisify } = require('util')
 const readFileAsync = promisify(fs.readFile)
 
 const readFileContent = () => {
-    return readFileAsync(process.argv.slice(2)[0])
+    return readFileAsync(process.argv.slice(3)[0])
 }
 
 const init = async () => {
