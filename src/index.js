@@ -188,7 +188,6 @@ if (process.env.NODE_ENV === 'test') {
             const { Deployer } = require('./deployer')
             return new Deployer().init()
         case 'commit-lint':
-            // need to test it ....
             return require('./commit-lint')
         case 'release':
         default:
