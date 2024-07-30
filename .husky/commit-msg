@@ -1,7 +1,3 @@
 #!/usr/bin/env sh
 
-#
-# Need to check the npx release-toolkit with deployer
-# it should be something like "npx release-toolkit commit-lint $1"
-
 node $PWD/src/index.js commit-lint $1 && yarn prettier-check

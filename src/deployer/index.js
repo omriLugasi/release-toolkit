@@ -96,6 +96,31 @@ class Deployer {
         console.log(`2. Create new github action file on ${targetPath} path`)
     }
 
+    async deployHuskyCommitMessage() {
+        const targetPath = path.join(
+            process.cwd(),
+            '.husky/commit-msg'
+        )
+        if (fs.existsSync(targetPath)) {
+            // do nothing
+            return
+        }
+
+        const folderTargetPath = path.join(
+            process.cwd(),
+            '.husky'
+        )
+
+        if (!fs.existsSync(folderTargetPath)) {
+            // If it doesn't exist, create the directory
+            fs.mkdirSync(folderTargetPath)
+        }
+
+        const content = `#!/usr/bin/env sh \n \n npx release-toolkit commit-lint $1`
+        const writeAsync = promisify(fs.writeFile)
+        await writeAsync(targetPath, content)
+    }
+
     async init() {
         const gitRemote = await this.exec('git ls-remote --get-url origin')
         let repo
@@ -122,6 +147,7 @@ class Deployer {
 
         await this.populateReleaseToolkitConfigFile(owner, repo)
         await this.deployGithubAction()
+        await this.deployHuskyCommitMessage()
     }
 }
 
