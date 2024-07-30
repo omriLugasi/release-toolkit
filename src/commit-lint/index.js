@@ -5,7 +5,8 @@ const { promisify } = require('util')
 const readFileAsync = promisify(fs.readFile)
 
 const readFileContent = () => {
-    return readFileAsync(process.argv.slice(3)[0])
+    const filePath = process.argv.slice(3)[0]
+    return readFileAsync(filePath)
 }
 
 const init = async () => {
@@ -19,15 +20,14 @@ const init = async () => {
             process.exit(0)
         }
     }
-    console.table([
-        {
-            'Commit Message': commitMessage,
-            Error: `Commit did not fit any of the provided patterns "${configService
+    console.error(
+        new Error(
+            `\n Commit Message: "${commitMessage.trim()}" did not fit for any of the provided patterns: ${configService
                 .get(Config.COMMIT_PATTERNS_KEY)
-                .map((item) => item.pattern)
-                .join(' | ')}".`,
-        },
-    ])
+                .map((item) => `\n \u274c\  ${item.pattern}`)
+                .join('')}`
+        )
+    )
     process.exit(1)
 }
 
