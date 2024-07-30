@@ -12,7 +12,6 @@ const commitResolver = require('./commit-resolver')
 const { NpmPublish } = require('./plugins/npm')
 const { NpmMirror } = require('./plugins/npm/mirror')
 const { WorkSpaceContext } = require('./utils/context')
-const { Deployer } = require('./deployer')
 
 class EntryPoint {
     async runWithGithub(workspace) {
