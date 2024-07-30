@@ -97,19 +97,13 @@ class Deployer {
     }
 
     async deployHuskyCommitMessage() {
-        const targetPath = path.join(
-            process.cwd(),
-            '.husky/commit-msg'
-        )
+        const targetPath = path.join(process.cwd(), '.husky/commit-msg')
         if (fs.existsSync(targetPath)) {
             // do nothing
             return
         }
 
-        const folderTargetPath = path.join(
-            process.cwd(),
-            '.husky'
-        )
+        const folderTargetPath = path.join(process.cwd(), '.husky')
 
         if (!fs.existsSync(folderTargetPath)) {
             // If it doesn't exist, create the directory
