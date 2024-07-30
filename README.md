@@ -1,4 +1,4 @@
-# release-toolkit
+# Release-toolkit
 Yet another tool to manage your releases
 
 [![NPM Version](https://img.shields.io/npm/v/release-toolkit.svg)](https://www.npmjs.com/package/release-toolkit)
