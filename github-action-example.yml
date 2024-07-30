@@ -1,0 +1,32 @@
+name: Release toolkit
+
+on:
+  push:
+    branches:
+      - <YOUR_BRANCH_NAME_HERE>
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.9.0
+          registry-url: https://registry.npmjs.org/
+
+      - name: 'Install Dependencies'
+        run: yarn install
+
+      - name: 'Tests'
+        run: yarn test
+
+      - name: 'Set .npm file file'
+        run: echo //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}} > .npmrc
+
+      - name: 'Create Release And Publish'
+        run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit
+
+      - name: 'Clean up'
+        run: |
+          rm .npmrc

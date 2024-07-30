@@ -44,6 +44,11 @@
       "title": "Chores"
     },
     {
+      "pattern": "^docs\\(\\):",
+      "upgrade": "ignore",
+      "title": "Docs"
+    },
+    {
       "pattern": "^ignore\\(\\):",
       "upgrade": "ignore"
     }

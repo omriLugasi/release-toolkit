@@ -11,7 +11,7 @@ In your `.husky/commit-msg` you can add the following:
 ```bash
 #!/usr/bin/env sh
 
-node $PWD/node_modules/.bin/commit-lint/index.js $1
+npx release-toolkit commit-lint $1
 ```
 
 

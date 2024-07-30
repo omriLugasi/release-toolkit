@@ -73,7 +73,6 @@ For example, if your repository is https://github.com/omriLugasi/release-toolkit
 ### Workspaces
 The `workspaces` section contains an array of workspace configurations for your repository. Each workspace configuration must include the following properties:
 
-
 ```json
 
   {
@@ -84,7 +83,8 @@ The `workspaces` section contains an array of workspace configurations for your 
   }
 ```
  - `branch`: The branch name that triggers the workspace release process upon a push.
- - `folderPath`: The folder path of the workspace in the repo (e.g., src/workspaces/my-awesome-project-1).
+ - `folderPath`: The folder path of the workspace in the repo (e.g., src/workspaces/my-awesome-project-1) 
+   - For repositories that want to trigger the release process for every change in the root folder, set `folderPath` to `'.'`.
  - `id`: A unique identifier for the workspace, which helps define the previous version. Do not change it once it's set.
  - `plugins`: An array of plugins to run during the release process (e.g., GitHub, npm, npm).
 

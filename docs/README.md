@@ -21,7 +21,7 @@ This file specifies the settings for the toolkit, such as whether to publish an 
 To use the Release Toolkit, execute the following command in your terminal:
 
 ```bash
-GH_TOKEN=<YOUR_GH_TOKEN_HERE> npx release-toolkit
+GH_TOKEN=<YOUR_GH_TOKEN_HERE> npx release-toolkit release
 ```
 Replace `<YOUR_GH_TOKEN_HERE>` with your GitHub token, which is required to authenticate and perform actions on your GitHub repository.
 
