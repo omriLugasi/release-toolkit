@@ -110,7 +110,7 @@ class Deployer {
             fs.mkdirSync(folderTargetPath)
         }
 
-        const content = `#!/usr/bin/env sh \n \n npx release-toolkit commit-lint $1`
+        const content = `#!/usr/bin/env sh \n \n npx release-toolkit@latest commit-lint $1`
         const writeAsync = promisify(fs.writeFile)
         await writeAsync(targetPath, content)
         console.log(

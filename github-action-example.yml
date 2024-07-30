@@ -25,7 +25,7 @@ jobs:
         run: echo //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}} > .npmrc
 
       - name: 'Create Release And Publish'
-        run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit release
+        run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit@latest release
 
       - name: 'Clean up'
         run: |
