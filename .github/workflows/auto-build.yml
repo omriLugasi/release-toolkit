@@ -26,8 +26,7 @@ jobs:
 
       - name: 'Create Release And Publish'
         run: |
-          GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit release
-        # GH_TOKEN=${{secrets.GH_TOKEN}} node ./src/index.js
+         GH_TOKEN=${{secrets.GH_TOKEN}} node ./src/index.js release
 
       - name: 'Clean up'
         run: |
