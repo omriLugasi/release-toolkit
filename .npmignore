@@ -6,5 +6,4 @@ docs/
 .prettierrc.json
 README.md
 release-toolkit.json
-release-toolkit-example.json
 .npmrc
