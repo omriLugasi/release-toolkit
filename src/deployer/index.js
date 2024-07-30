@@ -113,6 +113,9 @@ class Deployer {
         const content = `#!/usr/bin/env sh \n \n npx release-toolkit commit-lint $1`
         const writeAsync = promisify(fs.writeFile)
         await writeAsync(targetPath, content)
+        console.log(
+            `3. Create new github hook file (commit-msg) on ${targetPath} path, in order to work with the release toolkit commit lint you will need to install and init "husky"`
+        )
     }
 
     async init() {
