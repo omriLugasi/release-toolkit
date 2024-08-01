@@ -7,7 +7,6 @@
     {
       "branch": "<MAIN_BRANCH>",
       "folderPath": "<FOLDER_PATH_HERE>",
-      "id": "main",
       "plugins": [
         {
           "name": "github",

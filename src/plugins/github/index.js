@@ -37,92 +37,6 @@ class Github {
         axiosRetry(this.#axiosInstance, { retries: 5 })
     }
 
-    #extractCommitDate(releaseBody) {
-        const arr = releaseBody.split('<!--metadata:last-commit:start ')
-        if (arr.length !== 2) {
-            return null
-        }
-        return arr[1].split(' metadata:last-commit:end-->')[0]
-    }
-
-    #extractCommitId(releaseBody) {
-        const arr = releaseBody.split('<!--metadata:workspace-id:start ')
-        if (arr.length !== 2) {
-            return null
-        }
-        return arr[1].split(' metadata:workspace-id:end-->')[0]
-    }
-
-    /**
-     * @description
-     * Find the last release that related to the workspace
-     */
-    async #getLastRelease({ page } = { page: 1 }) {
-        const response = await this.#axiosInstance.get(
-            `/repos/${this.#owner}/${this.#repo}/releases?per_page=30&page=${page}`
-        )
-        if (!Array.isArray(response.data) || !response.data.length) {
-            return []
-        }
-
-        for (const release of response.data) {
-            const id = this.#extractCommitId(release.body)
-            if (id === this.#workspace.id) {
-                return [release]
-            }
-        }
-
-        return this.#getLastRelease({ page: page + 1 })
-    }
-
-    async #findRelatedCommit() {
-        const response = await this.#axiosInstance.get(
-            `/repos/${this.#owner}/${this.#repo}/commits/${this.#workspace.branch}`
-        )
-
-        const isRelatedToWorkspace = (commit) => {
-            for (const file of commit.files) {
-                if (this.#isFileRelatedToWorkspace(file.filename)) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        if (isRelatedToWorkspace(response.data)) {
-            return response.data.commit.committer.date
-        }
-
-        const reviewNextCommit = async (url) => {
-            const { data: commit } = await this.#axiosInstance.get(url)
-
-            if (isRelatedToWorkspace(commit)) {
-                return commit.commit.committer.date
-            }
-
-            if (
-                Array.isArray(commit.parents) &&
-                commit.parents.length &&
-                commit.parents[0].url
-            ) {
-                return reviewNextCommit(commit.parents[0].url)
-            }
-        }
-
-        const commitParents = response.data.parents
-        if (
-            Array.isArray(commitParents) &&
-            commitParents.length &&
-            commitParents[0].url
-        ) {
-            return reviewNextCommit(commitParents[0].url)
-        }
-
-        throw new Error(
-            `Cannot find any commit that related to workspace=[${this.#workspace.folderPath}]`
-        )
-    }
-
     #isCommitDateValid(commit, since) {
         return (
             new Date(commit.author.date).getTime() >
@@ -141,6 +55,10 @@ class Github {
         return filename.startsWith(this.#workspace.folderPath)
     }
 
+    /**
+     * @description
+     * Get commits data from the provided date.
+     */
     async #getCommitsByDate(since) {
         const response = await this.#axiosInstance.get(
             `/repos/${this.#owner}/${this.#repo}/commits/${this.#workspace.branch}`
@@ -228,12 +146,13 @@ class Github {
                 message += `\n- ${commit.message} ([${commit.name}](${commit.url})) by (${commit.metadata.committerName})`
             }
         }
-
-        message += `\n\n\n<!--metadata:last-commit:start ${lastCommit.metadata.date} metadata:last-commit:end-->`
-        message += `\n\n\n<!--metadata:workspace-id:start ${this.#workspace.id} metadata:workspace-id:end-->`
         return message
     }
 
+    /**
+     * @description
+     * Create release.
+     */
     async #createRelease(modifiedTag, newTag, commits, lastCommit) {
         const releaseName = modifyStringByDotNotation(
             { release: newTag },
@@ -265,6 +184,10 @@ class Github {
         return response.data.html_url
     }
 
+    /**
+     * @description
+     * Create Github Tag And Release
+     */
     async release(newTag, commits) {
         const lastCommit = commits.reduce((acc, current) => {
             if (!acc) {
@@ -288,7 +211,7 @@ class Github {
 
     /**
      * @description
-     * Find the tag version by the provided pattern.
+     * Extract the tag version from the matched tag.
      */
     #getTagVersion(tagName) {
         return tagName.match(/\d*[.]?\d[.]?\d*/)[0]
@@ -296,38 +219,44 @@ class Github {
 
     /**
      * @description
-     * Provide the tag version and last commit date (-3 milliseconds) in the repository.
-     * The -3 will provide us the option to point on this commit as a commit that trigger the flow.
+     * Get the tag that match the pattern and use it as base to get all the commits that related to this
+     * release process.
      */
-    async #getDetailsFromLastCommit() {
-        const since = await this.#findRelatedCommit()
-        return {
-            since: new Date(new Date(since.trim()).getTime() - 3).toISOString(),
-            tagVersion: '0.0.0',
+    async #getCommitsFromLastTag(params = { page: 1 }) {
+        const response = await this.#axiosInstance.get(
+            `/repos/${this.#owner}/${this.#repo}/tags?page=${params.page}&per_page=30`
+        )
+        const template = `^${this.#workspace.tagPattern.replace('{{tag}}', '\\d*[.]?\\d[.]?\\d*')}$`
+
+        if (!response.data.length) {
+            return {
+                since: new Date(new Date().getTime() - 1000 * 60).toISOString(),
+                tag: '0.0.0',
+            }
         }
+        for (const commit of response.data) {
+            const reg = new RegExp(template)
+            if (reg.test(commit.name)) {
+                const { data: commitData } = await this.#axiosInstance.get(
+                    commit.commit.url
+                )
+                return {
+                    since: commitData.commit.author.date,
+                    tag: this.#getTagVersion(commit.name),
+                }
+            }
+        }
+        return this.#getCommitsFromLastTag({ page: params.page + 1 })
     }
 
     /**
      * @description
-     * This function should work with github api to extract the commit messages from the last release.
-     * if release not exists for this workspace we will to find the last commit by the files changes, so we will iterate on the commits.
+     * The entry point to understand which version we already publish
+     * This function will return the commits that related to this release process (in order to use it inside the changelog)
+     * and the previous tag value in order to upgrade it according to the commits.
      */
     async getDetails() {
-        const [release] = await this.#getLastRelease()
-        let since
-        let tagVersion
-
-        if (!release) {
-            const response = await this.#getDetailsFromLastCommit()
-            since = response.since
-            tagVersion = response.tagVersion
-        } else {
-            since = this.#extractCommitDate(release.body)
-            if (since === null) {
-                since = release.created_at
-            }
-            tagVersion = this.#getTagVersion(release.tag_name)
-        }
+        const { tag, since } = await this.#getCommitsFromLastTag()
 
         const commits = await this.#getCommitsByDate(since)
         const results = commits.reduce(
@@ -349,7 +278,7 @@ class Github {
             },
             []
         )
-        return { commits: results, tag: tagVersion }
+        return { commits: results, tag }
     }
 }
 

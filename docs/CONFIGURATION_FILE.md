@@ -17,7 +17,6 @@ You can find good example in the following [link](https://github.com/omriLugasi/
     {
       "branch": "<MAIN_BRANCH>",
       "folderPath": "<FOLDER_PATH_HERE>",
-      "id": "main",
       "plugins": [
         {
           "name": "github",
@@ -78,14 +77,12 @@ The `workspaces` section contains an array of workspace configurations for your 
   {
       "branch": "<MAIN_BRANCH>",
       "folderPath": "<FOLDER_PATH_HERE>",
-      "id": "main",
       "plugins": []
   }
 ```
  - `branch`: The branch name that triggers the workspace release process upon a push.
  - `folderPath`: The folder path of the workspace in the repo (e.g., src/workspaces/my-awesome-project-1) 
    - For repositories that want to trigger the release process for every change in the root folder, set `folderPath` to `'.'`.
- - `id`: A unique identifier for the workspace, which helps define the previous version. Do not change it once it's set.
  - `plugins`: An array of plugins to run during the release process (e.g., GitHub, npm, npm).
 
 ### CommitPatterns
