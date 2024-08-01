@@ -542,6 +542,7 @@ describe('Main', () => {
             }
         )
     })
+
     describe('NPM plugin', () => {
         context(
             'When Github and NPM Plugins provided with simple scenario',
@@ -933,6 +934,7 @@ describe('Main', () => {
             }
         )
     })
+
     describe('NPM mirroring plugin', () => {
         context(
             'When Github and NPM mirroring Plugins provided with simple scenario',

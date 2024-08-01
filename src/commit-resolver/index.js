@@ -34,26 +34,22 @@ module.exports = (tag, commits) => {
     const upgrades = []
     for (const commit of commits) {
         const { message } = commit
-        let fitPatterns = false
+        const currentCommit = {
+            ...commit,
+            metadata: { ...commit.metadata, title: 'Default' },
+        }
         for (const { pattern, upgrade, title } of configService.get(
             Config.COMMIT_PATTERNS_KEY
         )) {
             const regex = new RegExp(pattern)
-            if (regex.test(message) && versions[upgrade] !== versions.ignore) {
-                affectedCommits.push({
-                    ...commit,
-                    metadata: { ...commit.metadata, title: title },
-                })
-                upgrades.push(versions[upgrade])
-                fitPatterns = true
+            if (regex.test(message)) {
+                currentCommit.metadata.title = title
+                if (versions[upgrade] !== versions.ignore) {
+                    upgrades.push(versions[upgrade])
+                }
             }
         }
-        if (!fitPatterns) {
-            affectedCommits.push({
-                ...commit,
-                metadata: { ...commit.metadata, title: 'Default' },
-            })
-        }
+        affectedCommits.push(currentCommit)
     }
 
     if (!upgrades.length) {
