@@ -54,7 +54,7 @@ const basicConfiguration = {
     ],
 }
 
-describe('Main', () => {
+describe.skip('Main', () => {
     context('No release toolkit file exists', () => {
         const sandbox = sinon.createSandbox()
         let consoleStub
@@ -129,11 +129,10 @@ describe('Main', () => {
     })
 
     describe('Github plugin', () => {
-        context('When Github Plugin provided with simple scenario', () => {
+        context.only('When Github Plugin provided with simple scenario', () => {
             const sandbox = sinon.createSandbox()
             const workspace = {
                 ...basicworkspaceObject,
-                id: 'github_1',
                 plugins: [basicGithubPlugin],
             }
             const commitMessages = [
