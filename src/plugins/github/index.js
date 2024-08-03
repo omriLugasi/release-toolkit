@@ -240,6 +240,7 @@ class Github {
                 const { data: commitData } = await this.#axiosInstance.get(
                     commit.commit.url
                 )
+
                 return {
                     since: commitData.commit.author.date,
                     tag: this.#getTagVersion(commit.name),
