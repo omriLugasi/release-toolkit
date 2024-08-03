@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const { configService, Config } = require('./config')
 const {
     LogManager,
@@ -180,17 +178,4 @@ class EntryPoint {
     }
 }
 
-if (process.env.NODE_ENV === 'test') {
-    module.exports = EntryPoint
-} else {
-    switch (process.argv[2]) {
-        case 'set-config':
-            const { Deployer } = require('./deployer')
-            return new Deployer().init()
-        case 'commit-lint':
-            return require('./commit-lint')
-        case 'release':
-        default:
-            new EntryPoint().init()
-    }
-}
+module.exports = EntryPoint

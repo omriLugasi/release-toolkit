@@ -5,9 +5,9 @@
     "repository": "git@github.com:omriLugasi/release-toolkit.git",
     "author": "omri luggasi",
     "license": "MIT",
-    "bin": "./src/index.js",
+    "bin": "./src/bin.js",
     "scripts": {
-        "test": "NODE_ENV=test mocha \"__tests__/**/*.test.js\"",
+        "test": "mocha \"__tests__/**/*.test.js\"",
         "prepare": "yarn husky install",
         "prettier-write": "prettier --write src __tests__",
         "prettier-check": "prettier --check src __tests__"

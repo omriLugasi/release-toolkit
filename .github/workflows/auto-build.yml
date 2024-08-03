@@ -26,7 +26,7 @@ jobs:
 
       - name: 'Create Release And Publish'
         run: |
-         GH_TOKEN=${{secrets.GH_TOKEN}} node ./src/index.js release
+         GH_TOKEN=${{secrets.GH_TOKEN}} node ./src/bin.js release
 
       - name: 'Clean up'
         run: |
