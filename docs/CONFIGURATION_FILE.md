@@ -110,6 +110,11 @@ This is based on commit message patterns and their corresponding upgrade actions
       "title": "Chores"
     },
     {
+      "pattern": "^docs\\(\\):",
+      "upgrade": "ignore",
+      "title": "Docs" 
+    },
+    {
       "pattern": "^ignore\\(\\):",
       "upgrade": "ignore"
     }

@@ -54,6 +54,7 @@ class EntryPoint {
                 plugin: GITHUB_PLUGIN_NAME,
                 description: 'Github operation failed',
                 comment: `Error: ${error}`,
+                e,
             })
             workspace.__workspace_context__.set(
                 WorkSpaceContext.GITHUB_STATUS_FIELD_NAME,
@@ -99,7 +100,7 @@ class EntryPoint {
         if (!shouldRunPlugin) {
             workspace.__workspace_logger__.log({
                 plugin: NPM_MIRROR_PLUGIN_NAME,
-                description: `no action taken`,
+                description: `No action taken`,
             })
             return
         }
