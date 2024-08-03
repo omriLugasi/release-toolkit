@@ -33,7 +33,7 @@
          run: echo //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}} > .npmrc
          
        - name: 'Create Release And Publish'
-         run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit
+         run: GH_TOKEN=${{secrets.GH_TOKEN}} npx release-toolkit release
          
        - name: 'Clean up'
          run: |

@@ -1,5 +1,5 @@
 # Release-toolkit
-Yet another tool to manage your releases
+🚀🚀🚀 Automate versioning and package publishing 🚀🚀🚀
 
 [![NPM Version](https://img.shields.io/npm/v/release-toolkit.svg)](https://www.npmjs.com/package/release-toolkit)
 [![NPM Downloads](https://img.shields.io/npm/dt/release-toolkit.svg)](https://www.npmjs.com/package/release-toolkit)
