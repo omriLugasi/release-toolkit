@@ -1,3 +1,7 @@
+<div align="center">
+	<img src="docs/logo.png" />
+</div>
+
 # Release-toolkit
 🚀🚀🚀 Automate versioning and package publishing 🚀🚀🚀
 
