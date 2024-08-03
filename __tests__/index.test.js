@@ -1,4 +1,4 @@
-const EntryPoint = require('./../src')
+const EntryPoint = require('../src')
 const sinon = require('sinon')
 const fs = require('fs')
 const axios = require('axios')
