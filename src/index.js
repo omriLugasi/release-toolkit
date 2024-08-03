@@ -100,7 +100,7 @@ class EntryPoint {
         if (!shouldRunPlugin) {
             workspace.__workspace_logger__.log({
                 plugin: NPM_MIRROR_PLUGIN_NAME,
-                description: `no action taken`,
+                description: `No action taken`,
             })
             return
         }

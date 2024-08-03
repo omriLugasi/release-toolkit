@@ -4,55 +4,8 @@ const fs = require('fs')
 const axios = require('axios')
 const { Config } = require('../src/config')
 const { LogManager } = require('../src/utils')
+const child_process = require('node:child_process')
 const assert = require('chai').assert
-
-// const basicworkspaceObject = {
-//     folderPath: 'src/mock',
-//     branch: 'master',
-// }
-//
-// const basicGithubPlugin = {
-//     name: 'github',
-//     tagPattern: '{{tag}}-main',
-//     releasePattern: 'Main - {{release}}',
-// }
-// const basicNpmPlugin = {
-//     name: 'npm',
-// }
-// const basicNpmMirroringPlugin = {
-//     name: 'npm:mirroring',
-//     packageName: '@custom/my-mirroring-package-name',
-//     pre: 'yarn build-same-app-with-different-context',
-// }
-
-// const basicConfiguration = {
-//     repository: {
-//         repo: 'mock_repo_name',
-//         owner: 'mock_owner_name',
-//     },
-//     workspaces: [],
-//     commitPatterns: [
-//         {
-//             pattern: '^refactor\\(\\):',
-//             upgrade: 'major',
-//             title: 'Refeactor!',
-//         },
-//         {
-//             pattern: '^feat\\(\\):',
-//             upgrade: 'minor',
-//             title: 'Features',
-//         },
-//         {
-//             pattern: '^chore\\(\\):',
-//             upgrade: 'build',
-//             title: 'Chores',
-//         },
-//         {
-//             pattern: '^ignore\\(\\):',
-//             upgrade: 'ignore',
-//         },
-//     ],
-// }
 
 const utils = {
     isGetTagsUrl: (url, owner, repo) =>
@@ -65,7 +18,7 @@ const utils = {
         url.startsWith(`/repos/${owner}/${repo}/commits`),
     isPostReleasesUrl: (url, owner, repo) =>
         url.startsWith(`/repos/${owner}/${repo}/releases`),
-    generateWorkspaces: () => [
+    generateWorkspaces: ({ additionalPlugins = [] } = {}) => [
         {
             branch: 'master',
             folderPath: '/src/mock',
@@ -75,6 +28,7 @@ const utils = {
                     tagPattern: '{{tag}}',
                     releasePattern: '{{release}}',
                 },
+                ...additionalPlugins,
             ],
         },
     ],
@@ -204,7 +158,7 @@ describe.only('Main', () => {
         })
     })
 
-    describe('Github plugin', () => {
+    context('Github plugin', () => {
         context(
             'When Github Plugin provided - no commits found that related to the pattern',
             () => {
@@ -878,6 +832,1559 @@ describe.only('Main', () => {
                             plugin: 'github',
                             description: 'Published a new release "0.1.0"',
                             comment: undefined,
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+    })
+
+    context('NPM plugin', () => {
+        context(
+            'When Github and NPM Plugins provided - no commits found that related to the pattern',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm',
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^refactor\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Refactor!',
+                        },
+                    ],
+                }
+                let logManagerStub
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: [] }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: utils.generateCommitResponse({
+                                        commit: {
+                                            message:
+                                                'message that is not in the right format.',
+                                            file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            date: new Date(
+                                                new Date().getTime() + 1000
+                                            ),
+                                        },
+                                    }),
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub twice', () => {
+                    assert.strictEqual(logManagerStub.callCount, 2)
+                })
+
+                it('should log that github plugin not invoke the publish action', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'No changes found. No action taken',
+                        }),
+                        true
+                    )
+                })
+
+                it('should log that npm plugin not invoke the publish action', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm',
+                            description: 'No action taken',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM publish should be invoke and pass successfully',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm',
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(null)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new release "0.1.0"',
+                            comment: undefined,
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm',
+                            description:
+                                'publish successfully a new version (0.1.0)',
+                            comment: '',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM publish should be invoke and pass successfully (dry run)',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm',
+                                dryRun: true,
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(null)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new release "0.1.0"',
+                            comment: undefined,
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm',
+                            description:
+                                'publish successfully a new version (0.1.0)',
+                            comment: 'DRY RUN',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM publish should be invoke and failed',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm',
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                const customError = new Error('this is a custom error')
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(customError)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the git release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm',
+                            description: 'publish failed for (0.1.0)',
+                            comment: 'Error: this is a custom error',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the failed npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm',
+                            description: 'publish failed for (0.1.0)',
+                            comment: `Error: ${customError.message}`,
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+    })
+
+    context('NPM Mirror plugin', () => {
+        context(
+            'When Github and NPM Plugins provided - no commits found that related to the pattern',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm:mirroring',
+                                packageName:
+                                    '@custom/my-mirroring-package-name',
+                                pre: 'yarn build-same-app-with-different-context',
+                                dryRun: true,
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^refactor\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Refactor!',
+                        },
+                    ],
+                }
+                let logManagerStub
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: [] }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: utils.generateCommitResponse({
+                                        commit: {
+                                            message:
+                                                'message that is not in the right format.',
+                                            file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            date: new Date(
+                                                new Date().getTime() + 1000
+                                            ),
+                                        },
+                                    }),
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub twice', () => {
+                    assert.strictEqual(logManagerStub.callCount, 2)
+                })
+
+                it('should log that github plugin not invoke the publish action', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'No changes found. No action taken',
+                        }),
+                        true
+                    )
+                })
+
+                it('should log that npm plugin not invoke the publish action', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm:mirroring',
+                            description: 'No action taken',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM Mirror publish should be invoke and pass successfully',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm:mirroring',
+                                packageName:
+                                    '@custom/my-mirroring-package-name',
+                                pre: 'yarn build-same-app-with-different-context',
+                                dryRun: true,
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(null)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new release "0.1.0"',
+                            comment: undefined,
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm:mirroring',
+                            description:
+                                'publish successfully a new version (0.1.0)',
+                            comment: 'DRY RUN',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM Mirror publish should be invoke and pass successfully (dry run)',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm:mirroring',
+                                packageName:
+                                    '@custom/my-mirroring-package-name',
+                                pre: 'yarn build-same-app-with-different-context',
+                                dryRun: true,
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(null)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new release "0.1.0"',
+                            comment: undefined,
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the new npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm:mirroring',
+                            description:
+                                'publish successfully a new version (0.1.0)',
+                            comment: 'DRY RUN',
+                        }),
+                        true
+                    )
+                })
+            }
+        )
+
+        context(
+            'When Github Plugin provided - new NPM Mirror publish should be invoke and failed',
+            () => {
+                const sandbox = sinon.createSandbox()
+                const nowDate = new Date()
+                const config = {
+                    repository: {
+                        owner: 'owner',
+                        repo: 'repo',
+                    },
+                    workspaces: utils.generateWorkspaces({
+                        additionalPlugins: [
+                            {
+                                name: 'npm:mirroring',
+                                packageName:
+                                    '@custom/my-mirroring-package-name',
+                                pre: 'yarn build-same-app-with-different-context',
+                                dryRun: true,
+                            },
+                        ],
+                    }),
+                    commitPatterns: [
+                        {
+                            pattern: '^feat\\(\\):',
+                            upgrade: 'minor',
+                            title: 'Features',
+                        },
+                        {
+                            pattern: '^chore\\(\\):',
+                            upgrade: 'build',
+                            title: 'Chores',
+                        },
+                    ],
+                }
+                let logManagerStub
+                let requestCommitsIndex = 0
+                const customError = new Error('this is a custom error')
+                before(async () => {
+                    sandbox.useFakeTimers({
+                        now: nowDate.getTime(),
+                    })
+
+                    logManagerStub = sandbox
+                        .stub(LogManager.prototype, 'log')
+                        .callsFake(() => {})
+
+                    sandbox.stub(Config.prototype, 'init').resolves()
+
+                    sandbox
+                        .stub(Config.prototype, 'get')
+                        .callsFake((property) => {
+                            return config[property]
+                        })
+
+                    sandbox
+                        .stub(child_process, 'exec')
+                        .callsFake((command, callback) => {
+                            callback(null, 'some response from child process')
+                        })
+                    sandbox
+                        .stub(fs, 'readFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(
+                                null,
+                                JSON.stringify({
+                                    version: '0.0.0',
+                                    name: 'release-toolkit',
+                                })
+                            )
+                        })
+                    sandbox
+                        .stub(fs, 'writeFile')
+                        .callsFake((path, encode, callback) => {
+                            callback(customError)
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'get')
+                        .callsFake((url) => {
+                            if (
+                                utils.isGetTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: [
+                                        {
+                                            name: config.workspaces[0].plugins[0].tagPattern.replace(
+                                                '{{tag}}',
+                                                '0.0.1'
+                                            ),
+                                            commit: {
+                                                url: `/repos/${config.repository.owner}/${config.repository.repo}/commits/sha-string`,
+                                            },
+                                        },
+                                    ],
+                                }
+                            } else if (
+                                utils.isCommitsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                // return the commit of the latest tag
+                                if (requestCommitsIndex === 0) {
+                                    requestCommitsIndex += 1
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'chore(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime()
+                                                ),
+                                                file: 'path-that-not-match-provided-folder-path',
+                                            },
+                                        }),
+                                    }
+                                }
+                                // return the first new commit
+                                else if (requestCommitsIndex === 1) {
+                                    return {
+                                        data: utils.generateCommitResponse({
+                                            commit: {
+                                                message:
+                                                    'feat(): this is a custom commit message',
+                                                date: new Date(
+                                                    new Date().getTime() + 3000
+                                                ),
+                                                file: `${config.workspaces[0].folderPath}/index.sh`,
+                                            },
+                                        }),
+                                    }
+                                }
+                            }
+                        })
+
+                    sandbox
+                        .stub(axios.Axios.prototype, 'post')
+                        .callsFake((url) => {
+                            if (
+                                utils.isPostTagsUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: { sha: 'this-is-a-sha-string' } }
+                            } else if (
+                                utils.isPostTagsRefUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return { data: {} }
+                            } else if (
+                                utils.isPostReleasesUrl(
+                                    url,
+                                    config.repository.owner,
+                                    config.repository.repo
+                                )
+                            ) {
+                                return {
+                                    data: {
+                                        sha: {
+                                            html_url:
+                                                'this-is-an-html-url-string',
+                                        },
+                                    },
+                                }
+                            }
+                        })
+
+                    await new EntryPoint().init()
+                })
+
+                after(() => {
+                    sandbox.restore()
+                })
+
+                it('should invoke the logger stub 3 times', () => {
+                    assert.strictEqual(logManagerStub.callCount, 3)
+                })
+
+                it('should invoke the log with the new tag details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'github',
+                            description: 'Published a new tag "0.1.0"',
+                            comment: 'https://github.com/owner/repo/tree/0.1.0',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the git release details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm:mirroring',
+                            description: 'publish failed for (0.1.0)',
+                            comment: 'Error: this is a custom error',
+                        }),
+                        true
+                    )
+                })
+
+                it('should invoke the log with the failed npm publish details', () => {
+                    assert.strictEqual(
+                        logManagerStub.calledWith({
+                            plugin: 'npm:mirroring',
+                            description: 'publish failed for (0.1.0)',
+                            comment: `Error: ${customError.message}`,
                         }),
                         true
                     )
