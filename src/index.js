@@ -159,7 +159,7 @@ class EntryPoint {
 
     /**
      * @description
-     * EntryPoint.
+     * This function is the entry point of the release toolkit.
      * Init the config service, validate the workspaces property from the config and run the flow.
      */
     async init() {
