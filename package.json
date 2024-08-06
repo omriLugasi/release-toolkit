@@ -22,5 +22,21 @@
         "mocha": "^10.6.0",
         "prettier": "^3.3.3",
         "sinon": "^18.0.0"
-    }
+    },
+    "homepage": "https://github.com/omriLugasi/release-toolkit#readme",
+    "keywords": [
+        "author",
+        "automation",
+        "changelog",
+        "module",
+        "package",
+        "publish",
+        "release",
+        "semver",
+        "version",
+        "release-toolkit",
+        "monorepo",
+        "release",
+        "manager"
+    ]
 }
