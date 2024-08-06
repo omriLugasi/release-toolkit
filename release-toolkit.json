@@ -6,7 +6,7 @@
   "workspaces": [
     {
       "branch": "master",
-      "folderPath": "src",
+      "folderPath": ".",
       "plugins": [
         {
           "name": "github",
