@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-switch (process.argv[2]) {
+const cmd = process.argv[2]
+switch (cmd) {
     case 'set-config':
         const { Deployer } = require('./deployer')
         return new Deployer().init()
