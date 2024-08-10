@@ -4,6 +4,6 @@
 * [Plugins](PLUGINS_FILE.md)
 * [Commit lint](COMMIT_LINT.md)
 * [Github Action](GITHUB_ACTION_FILE.md)
-* [Migrate From Semantic Release](#)
+* [Migrate From Semantic Release](MIGRATION_FROM_SEMANTIC_RELEASE.md)
 * [Videos](#)
 * [Licence](/?id=license)
